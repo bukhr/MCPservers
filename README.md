@@ -1,25 +1,25 @@
-  # Model Context Protocol Servers
+  # Servidores Model Context Protocol (MCP)
 
-Este repositorio contiene únicamente implementaciones de referencia para el [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) enfocadas en tres servidores:
+Este repositorio contiene implementaciones de referencia para el [Model Context Protocol](https://modelcontextprotocol.io/) (MCP), enfocadas únicamente en tres servidores:
 
 - **[Git](src/git)**: Herramientas para leer, buscar y manipular repositorios Git locales.
 - **[GitHub](src/github)**: Operaciones sobre repositorios remotos y la API de GitHub.
 - **[Google Drive](src/gdrive)**: Acceso y búsqueda de archivos en Google Drive.
 
-Estos servidores demuestran cómo el MCP puede ofrecer a los Modelos de Lenguaje Grande (LLMs) acceso seguro y controlado a repositorios de código y archivos en la nube.
+Estos servidores demuestran cómo MCP puede ofrecer a LLMs acceso seguro y controlado a repositorios de código y archivos en la nube.
 
 ## Uso
 
-Cada servidor MCP está implementado con el [SDK de TypeScript para MCP](https://github.com/modelcontextprotocol/typescript-sdk) o el [SDK de Python para MCP](https://github.com/modelcontextprotocol/python-sdk).
+Cada servidor MCP está implementado usando el [SDK de TypeScript para MCP](https://github.com/modelcontextprotocol/typescript-sdk) o el [SDK de Python para MCP](https://github.com/modelcontextprotocol/python-sdk).
 
-Para ejecutar un servidor basado en TypeScript:
+### Ejecutar un servidor basado en TypeScript
 
 ```sh
 npx -y @modelcontextprotocol/server-gdrive
 npx -y @modelcontextprotocol/server-github
 ```
 
-Para ejecutar el servidor de Git (Python):
+### Ejecutar el servidor de Git (Python)
 
 ```sh
 uvx mcp-server-git
@@ -28,20 +28,22 @@ pip install mcp-server-git
 python -m mcp_server_git
 ```
 
-## Ejemplo de configuración para clientes MCP
+## Uso en un cliente MCP
+
+Ejecutar un servidor por sí solo no suele ser útil; lo habitual es configurarlo como parte de un cliente MCP. Por ejemplo, esta es una configuración típica para Claude Desktop:
 
 ```json
 {
   "mcpServers": {
     "git": {
       "command": "uvx",
-      "args": ["mcp-server-git", "--repository", "path/to/git/repo"]
+      "args": ["mcp-server-git", "--repository", "ruta/a/tu/repositorio"]
     },
     "github": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-github"],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<TU_TOKEN>"
       }
     },
     "gdrive": {
@@ -51,16 +53,12 @@ python -m mcp_server_git
   }
 }
 ```
-## 🚀 Getting Started
 
-### Using MCP Servers in this Repository
-Typescript-based servers in this repository can be used directly with `npx`.
+## Licencia
 
-For example, this will start the [Memory](src/memory) server:
-```sh
-npx -y @modelcontextprotocol/server-memory
-```
+Este proyecto está licenciado bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
 
+## Contribución
 Python-based servers in this repository can be used directly with [`uvx`](https://docs.astral.sh/uv/concepts/tools/) or [`pip`](https://pypi.org/project/pip/). `uvx` is recommended for ease of use and setup.
 
 For example, this will start the [Git](src/git) server:
@@ -117,30 +115,13 @@ Additional examples of using the Claude Desktop as an MCP client might look like
 }
 ```
 
-## 🛠️ Creating Your Own Server
+## 🛠️ Crear tu propio servidor MCP
 
-Interested in creating your own MCP server? Visit the official documentation at [modelcontextprotocol.io](https://modelcontextprotocol.io/introduction) for comprehensive guides, best practices, and technical details on implementing MCP servers.
+¿Te interesa crear tu propio servidor MCP? Consulta la documentación oficial en [modelcontextprotocol.io](https://modelcontextprotocol.io/introduction) para encontrar guías completas, buenas prácticas y detalles técnicos sobre cómo implementar servidores MCP.
 
-## 🤝 Contributing
+## 🤝 Contribuir
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for information about contributing to this repository.
+Consulta el archivo [CONTRIBUTING.md](CONTRIBUTING.md) para información sobre cómo contribuir a este repositorio.
 
-## 🔒 Security
-
-See [SECURITY.md](SECURITY.md) for reporting security vulnerabilities.
-
-## 📜 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 💬 Community
-
-- [GitHub Discussions](https://github.com/orgs/modelcontextprotocol/discussions)
-
-## ⭐ Support
-
-If you find MCP servers useful, please consider starring the repository and contributing new servers or improvements!
-
----
 
 Managed by Anthropic, but built together with the community. The Model Context Protocol is open source and we encourage everyone to contribute their own servers and improvements!
