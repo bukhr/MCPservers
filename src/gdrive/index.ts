@@ -144,6 +144,39 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ["query"],
         },
       },
+      {
+        name: "readGoogleDoc",
+        description:
+          "Lee el contenido de un Google Doc por secciones (tab) y chunks, permitiendo especificar el formato y la sección a leer.",
+        inputSchema: {
+          type: "object",
+          properties: {
+            file_id: {
+              type: "string",
+              description: "ID del archivo de Google Docs a leer",
+            },
+            mime_type: {
+              type: "string",
+              description:
+                "Formato para exportar el documento (por defecto text/plain)",
+            },
+            tab: {
+              type: "string",
+              description: "Nombre del heading/sección a leer (opcional)",
+            },
+            chunk_index: {
+              type: "integer",
+              description: "Índice del chunk a devolver (opcional, default 0)",
+            },
+            chunk_size: {
+              type: "integer",
+              description:
+                "Tamaño máximo de caracteres por chunk (opcional, default 4000)",
+            },
+          },
+          required: ["file_id"],
+        },
+      },
     ],
   };
 });
@@ -172,24 +205,170 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       ],
       isError: false,
     };
+  } else if (request.params.name === "readGoogleDoc") {
+    const fileId: string = request.params.arguments?.file_id as string;
+    const mimeType: string = (request.params.arguments?.mime_type ??
+      "text/plain") as string;
+    const tab: string | undefined = request.params.arguments?.tab as
+      | string
+      | undefined;
+    const chunkIndex: number = (request.params.arguments?.chunk_index ??
+      0) as number;
+    const chunkSize: number = (request.params.arguments?.chunk_size ??
+      4000) as number;
+
+    // Si el formato no es text/plain, usa la API de exportación de Drive
+    if (mimeType !== "text/plain" && mimeType !== "text/markdown") {
+      const res = await drive.files.export(
+        { fileId, mimeType },
+        { responseType: "arraybuffer" }
+      );
+      const isText =
+        mimeType.startsWith("text/") || mimeType === "application/json";
+      if (isText) {
+        const fullText = Buffer.from(res.data as ArrayBuffer).toString("utf-8");
+        const totalChunks = Math.ceil(fullText.length / chunkSize);
+        if (chunkIndex >= totalChunks) {
+          throw new Error(
+            `chunk_index fuera de rango. El documento tiene ${totalChunks} chunks.`
+          );
+        }
+        const chunkText = fullText.slice(
+          chunkIndex * chunkSize,
+          (chunkIndex + 1) * chunkSize
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: chunkText,
+            },
+          ],
+          isError: false,
+          meta: {
+            chunk_index: chunkIndex,
+            total_chunks: totalChunks,
+            chunk_size: chunkSize,
+            mime_type: mimeType,
+            chars_total: fullText.length,
+          },
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: "text",
+              text: "[Binary file content available as base64]",
+            },
+          ],
+          isError: false,
+          meta: {
+            mime_type: mimeType,
+          },
+        };
+      }
+    }
+
+    const docs = google.docs({ version: "v1" });
+    const docRes = await docs.documents.get({ documentId: fileId });
+    const body: Array<any> = docRes.data.body?.content || [];
+
+    function extractText(elements: Array<any>): string {
+      let text = "";
+      for (const el of elements) {
+        if (el.paragraph && el.paragraph.elements) {
+          for (const pe of el.paragraph.elements) {
+            if (pe.textRun && pe.textRun.content) {
+              text += pe.textRun.content;
+            }
+          }
+        }
+      }
+      return text;
+    }
+
+    let sectionElements: Array<any> = [];
+    if (tab) {
+      let inSection = false;
+      for (const el of body) {
+        if (
+          el.paragraph &&
+          el.paragraph.paragraphStyle &&
+          el.paragraph.paragraphStyle.namedStyleType === "HEADING_1"
+        ) {
+          const headingText = extractText([el]).trim();
+          if (headingText === tab) {
+            inSection = true;
+            continue;
+          }
+          if (inSection) break;
+        }
+        if (inSection) sectionElements.push(el);
+      }
+      if (!sectionElements.length) {
+        throw new Error(
+          `No se encontró la sección/tab "${tab}" en el documento.`
+        );
+      }
+    } else {
+      sectionElements = body;
+    }
+
+    const fullText: string = extractText(sectionElements);
+
+    const totalChunks: number = Math.ceil(fullText.length / chunkSize);
+    if (chunkIndex >= totalChunks) {
+      throw new Error(
+        `chunk_index fuera de rango. El documento tiene ${totalChunks} chunks.`
+      );
+    }
+    const chunkText: string = fullText.slice(
+      chunkIndex * chunkSize,
+      (chunkIndex + 1) * chunkSize
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: chunkText,
+        },
+      ],
+      isError: false,
+      meta: {
+        chunk_index: chunkIndex,
+        total_chunks: totalChunks,
+        chunk_size: chunkSize,
+        tab: tab || null,
+        chars_total: fullText.length,
+        mime_type: mimeType,
+      },
+    };
   }
   throw new Error("Tool not found");
 });
 
-const credentialsPath = process.env.GDRIVE_CREDENTIALS_PATH || path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../../../.gdrive-server-credentials.json",
-);
+const credentialsPath =
+  process.env.GDRIVE_CREDENTIALS_PATH ||
+  path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../../../.gdrive-server-credentials.json"
+  );
 
 async function authenticateAndSaveCredentials() {
   console.log("Launching auth flow…");
-  const auth = await authenticate({
-    keyfilePath: process.env.GDRIVE_OAUTH_PATH || path.join(
-      path.dirname(fileURLToPath(import.meta.url)),
-      "../../../gcp-oauth.keys.json",
-    ),
+  const authOptions: any = {
+    keyfilePath:
+      process.env.GDRIVE_OAUTH_PATH ||
+      path.join(
+        path.dirname(fileURLToPath(import.meta.url)),
+        "../../../gcp-oauth.keys.json"
+      ),
     scopes: ["https://www.googleapis.com/auth/drive.readonly"],
-  });
+    access_type: "offline",
+    prompt: "consent",
+  };
+  const auth = await authenticate(authOptions);
   fs.writeFileSync(credentialsPath, JSON.stringify(auth.credentials));
   console.log("Credentials saved. You can now run the server.");
 }
