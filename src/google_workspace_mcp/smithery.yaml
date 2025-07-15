@@ -1,0 +1,49 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+build:
+  dockerBuildPath: .
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required:
+      - googleOauthClientId
+      - googleOauthClientSecret
+    properties:
+      googleOauthClientId:
+        type: string
+        description: "(required) - Your Google OAuth 2.0 Client ID from Google Cloud Console"
+      googleOauthClientSecret:
+        type: string
+        description: "(required) - Your Google OAuth 2.0 Client Secret from Google Cloud Console"
+      googleOauthRedirectUri:
+        type: string
+        description: "(optional) - OAuth redirect URI - Default: http://localhost:8000/oauth2callback"
+      googleClientSecretPath:
+        type: string
+        description: "(optional) - Path to client_secret.json file (alternative to environment variables)"
+      workspaceMcpBaseUri:
+        type: string
+        description: "(optional) - Base URI for the server - Default: http://localhost"
+      workspaceMcpPort:
+        type: string
+        description: "(optional) - Port the server listens on - Default: 8000"
+      oauthlibInsecureTransport:
+        type: string
+        description: "(optional) - Set to '1' for development environments - Default: none"
+  commandFunction:
+    |-
+    (config) => ({
+      command: 'python',
+      args: ['main.py', '--transport', 'streamable-http'],
+      env: {
+        GOOGLE_OAUTH_CLIENT_ID: config.googleOauthClientId,
+        GOOGLE_OAUTH_CLIENT_SECRET: config.googleOauthClientSecret,
+        ...(config.googleOauthRedirectUri && { GOOGLE_OAUTH_REDIRECT_URI: config.googleOauthRedirectUri }),
+        ...(config.googleClientSecretPath && { GOOGLE_CLIENT_SECRET_PATH: config.googleClientSecretPath }),
+        ...(config.workspaceMcpBaseUri && { WORKSPACE_MCP_BASE_URI: config.workspaceMcpBaseUri }),
+        ...(config.workspaceMcpPort && { WORKSPACE_MCP_PORT: config.workspaceMcpPort }),
+        ...(config.oauthlibInsecureTransport && { OAUTHLIB_INSECURE_TRANSPORT: config.oauthlibInsecureTransport })
+      }
+    })
