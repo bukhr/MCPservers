@@ -1,0 +1,141 @@
+{
+  "dxt_version": "0.1",
+  "name": "workspace-mcp",
+  "display_name": "Google Workspace MCP",
+  "version": "1.0.2",
+  "description": "Full natural language control over Google Calendar, Drive, Gmail, Docs, Sheets, Slides, Forms, and Chat through all MCP clients, AI assistants and developer tools",
+  "long_description": "A production-ready MCP server that integrates all major Google Workspace services with AI assistants. Built with FastMCP for optimal performance, featuring advanced authentication handling, service caching, and streamlined development patterns.",
+  "author": {
+    "name": "Taylor Wilsdon",
+    "email": "taylor@taylorwilsdon.com",
+    "url": "https://taylorwilsdon.com"
+  },
+  "homepage": "https://workspacemcp.com/",
+  "documentation": "https://github.com/taylorwilsdon/google_workspace_mcp",
+  "support": "https://github.com/taylorwilsdon/google_workspace_mcp/issues",
+  "server": {
+    "type": "python",
+    "entry_point": "main.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${__dirname}",
+        "python",
+        "${__dirname}/main.py"
+      ]
+    }
+  },
+  "tools": [
+    {
+      "name": "Google Calendar",
+      "description": "Manage Google Calendar through AI with full calendar and event capability"
+    },
+    {
+      "name": "Google Drive",
+      "description": "Manage Google Drive through AI with full search, list and create capability"
+    },
+    {
+      "name": "Gmail",
+      "description": "Manage Gmail through AI with support for search, draft, send, respond and more"
+    },
+    {
+      "name": "Google Docs",
+      "description": "Manage Google Docs through Ai with capability to search, extract, list, create and copy - including templated variable repalcement support"
+    },
+    {
+      "name": "Google Sheets",
+      "description": "Manage Google Sheets through AI with support for read, write, modify and create"
+    },
+    {
+      "name": "Google Forms",
+      "description": "Manage Google Forms through AI with support for creation, retreival, publishing, response management and more"
+    },
+    {
+      "name": "Manage Google Chat through AI with support for space and DM list, get, send and search messages",
+      "description": "Manage Google Chat through AI with support for space and DM list, get, send and search messages"
+    }
+  ],
+  "user_config": {
+    "GOOGLE_OAUTH_CLIENT_ID": {
+      "type": "string",
+      "title": "Google OAuth Client ID",
+      "description": "OAuth 2.0 client ID from Google Cloud Console (e.g., your-client-id.apps.googleusercontent.com)",
+      "required": false,
+      "sensitive": false,
+      "default": "your-client-id.apps.googleusercontent.com"
+    },
+    "GOOGLE_OAUTH_CLIENT_SECRET": {
+      "type": "string",
+      "title": "Google OAuth Client Secret",
+      "description": "OAuth 2.0 client secret from Google Cloud Console",
+      "required": false,
+      "sensitive": true
+    },
+    "GOOGLE_OAUTH_REDIRECT_URI": {
+      "type": "string",
+      "title": "Google OAuth Redirect URI",
+      "description": "OAuth 2.0 redirect URI for authentication callback",
+      "required": false,
+      "sensitive": false,
+      "default": "http://localhost:8000/oauth2callback"
+    },
+    "GOOGLE_CLIENT_SECRET_PATH": {
+      "type": "string",
+      "title": "Google Client Secret File Path",
+      "description": "Path to the client_secret.json file containing OAuth credentials",
+      "required": false,
+      "sensitive": false
+    },
+    "GOOGLE_CLIENT_SECRETS": {
+      "type": "string",
+      "title": "Google Client Secrets (Legacy)",
+      "description": "Legacy environment variable for client secret file path (use GOOGLE_CLIENT_SECRET_PATH instead)",
+      "required": false,
+      "sensitive": false
+    },
+    "WORKSPACE_MCP_BASE_URI": {
+      "type": "string",
+      "title": "Workspace MCP Base URI",
+      "description": "Base URI for the MCP server, affects OAuth redirect URI and Gemini function calling",
+      "required": false,
+      "sensitive": false,
+      "default": "http://localhost"
+    },
+    "WORKSPACE_MCP_PORT": {
+      "type": "string",
+      "title": "Workspace MCP Port",
+      "description": "Port number for the MCP server to listen on",
+      "required": false,
+      "sensitive": false,
+      "default": "8000"
+    },
+    "OAUTHLIB_INSECURE_TRANSPORT": {
+      "type": "string",
+      "title": "OAuth Insecure Transport",
+      "description": "Allow OAuth over HTTP for development (set to '1' for development only)",
+      "required": false,
+      "sensitive": false,
+      "default": "1"
+    }
+  },
+  "keywords": [
+    "google",
+    "workspace",
+    "mcp",
+    "server",
+    "chat",
+    "drive",
+    "docs",
+    "forms",
+    "gmail",
+    "slides",
+    "sheets"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taylorwilsdon/google_workspace_mcp"
+  }
+}
