@@ -19,6 +19,7 @@
     "link-all": "npm link --workspaces"
   },
   "dependencies": {
-    "@modelcontextprotocol/server-gdrive": "*"
+    "@modelcontextprotocol/server-gdrive": "*",
+    "winston": "^3.17.0"
   }
 }
