@@ -5,12 +5,13 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { Config, LogConfig } from '../types/index.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// En ESM, evitar usar los identificadores especiales __filename/__dirname para no colisionar con CJS
+const currentFilename = fileURLToPath(import.meta.url);
+const currentDirname = dirname(currentFilename);
 
 export const MCP_CONFIG_PATH = path.join(os.homedir(), '.codeium', 'windsurf', 'mcp_config.json');
 
-const DEFAULT_LOG_DIR = path.join(__dirname, '../logs');
+const DEFAULT_LOG_DIR = path.join(currentDirname, '../logs');
 
 export const DEFAULT_LOG_CONFIG: LogConfig = {
   enableFileLogs: true,
