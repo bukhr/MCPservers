@@ -30,7 +30,7 @@ export const isTeamRepository = (team: TeamConfig, repo: string): boolean => {
  * @param prAuthor Usuario que creó el PR (para excluirlo de los revisores potenciales)
  * @returns Lista de miembros disponibles para revisión
  */
-export const getAvailableTeamMembers = (team: TeamConfig, prAuthor: string): TeamMember[] => {
+export const getAvailableTeamMembers = (team: TeamConfig, excludeMembersByNickname: string[]): TeamMember[] => {
   if (!team.members || team.members.length === 0) {
     teamLogger.warn('Equipo sin miembros configurados', { teamName: team.team_name });
     return [];
@@ -42,13 +42,13 @@ export const getAvailableTeamMembers = (team: TeamConfig, prAuthor: string): Tea
       return false;
     }
     
-    return member.nickname_github.toLowerCase() !== prAuthor.toLowerCase();
+    return !excludeMembersByNickname.find(nickname => nickname.toLowerCase() === member.nickname_github.toLowerCase());
   });
 
   if (availableMembers.length === 0) {
     teamLogger.warn('No hay miembros disponibles para revisión', { 
       teamName: team.team_name, 
-      prAuthor 
+      excludeMembersByNickname 
     });
   }
 
