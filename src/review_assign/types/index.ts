@@ -17,6 +17,7 @@ export interface TeamConfig {
     members: TeamMember[];
     repositories: string[];
     webhook_url?: string;
+    exclude_members_by_nickname?: string[];
 }
 
 export interface Config {
