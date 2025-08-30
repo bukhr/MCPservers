@@ -2,6 +2,16 @@ import { createLogger } from '../utils/logger.js';
 
 export const notificationLogger = createLogger('review_assign_notification', 'notification');
 
+/**
+ * Envía una notificación al Google Chat
+ * @param webhookUrl URL del webhook del espacio de Google Chat
+ * @param prTitle Título del PR
+ * @param repo Repositorio en formato owner/repo
+ * @param prAuthor Login del autor del PR
+ * @param reviewerName Nombre del revisor
+ * @param prUrl URL del PR
+ * @param threadKey Clave del hilo
+ */
 export const sendChatNotification = async (
     webhookUrl: string | undefined,
     prTitle: string,

@@ -20,9 +20,11 @@ const mockGetPullRequestInfo = jest.fn<() => Promise<PullRequestInfo>>().mockRes
     author: { login: '' }
 });
 const mockAssignReviewer = jest.fn<() => Promise<void>>().mockResolvedValue(undefined);
+const mockGetTeamMembers = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 jest.unstable_mockModule('../../services/github.js', () => ({
     getPullRequestInfo: mockGetPullRequestInfo,
-    assignReviewer: mockAssignReviewer
+    assignReviewer: mockAssignReviewer,
+    getTeamMembers: mockGetTeamMembers
 }));
 
 const mockSelectOptimalReviewer = jest.fn<() => Promise<ReviewerSelection>>().mockResolvedValue({
@@ -40,9 +42,11 @@ jest.unstable_mockModule('../../services/notification.js', () => ({
 
 const mockGetAvailableTeamMembers = jest.fn().mockReturnValue([]);
 const mockIsTeamRepository = jest.fn().mockReturnValue(true);
+const mockGetMembers = jest.fn<() => Promise<any[]>>().mockResolvedValue([]);
 jest.unstable_mockModule('../../services/team.js', () => ({
     getAvailableTeamMembers: mockGetAvailableTeamMembers,
-    isTeamRepository: mockIsTeamRepository
+    isTeamRepository: mockIsTeamRepository,
+    getMembers: mockGetMembers
 }));
 
 const mockErrorLogger = jest.fn();
@@ -90,8 +94,6 @@ describe('assign-reviewer tool', () => {
     
             toolModule.registerAssignReviewerTool(mockServer);
             const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
-            
-    
             const testConfig = {
                 teams: [{
                     team_name: 'Test Team',
@@ -102,6 +104,7 @@ describe('assign-reviewer tool', () => {
                     ]
                 }]
             };
+
             mockLoadConfiguration.mockReturnValue(testConfig);
             mockIsTeamRepository.mockReturnValue(true);
             mockGetPullRequestInfo.mockResolvedValue({
@@ -116,7 +119,9 @@ describe('assign-reviewer tool', () => {
                 selectedReviewer: { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' },
                 reviewerStats: [{ member: { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' }, reviewCount: 5, normalizedCount: 5 }]
             });
-            
+            mockGetMembers.mockResolvedValue([
+                { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' }
+            ]);
     
             const result = await handlerFn({ 
                 repo: 'owner/test-repo', 
@@ -124,12 +129,10 @@ describe('assign-reviewer tool', () => {
                 days: 7,
                 thread_key: 'test-key'
             });
-            
     
             expect(result).toBeDefined();
             expect(result.content[0].type).toBe('text');
             expect(JSON.parse(result.content[0].text)).toHaveProperty('status', 'success');
-            
     
             expect(mockLoadConfiguration).toHaveBeenCalled();
             expect(mockIsTeamRepository).toHaveBeenCalled();
@@ -162,8 +165,6 @@ describe('assign-reviewer tool', () => {
     
             toolModule.registerAssignReviewerTool(mockServer);
             const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
-            
-    
             const testConfig = {
                 teams: [{
                     team_name: 'Test Team',
@@ -172,6 +173,7 @@ describe('assign-reviewer tool', () => {
                     members: [{ name: 'Member 1', nickname_github: 'author1', email: 'member1@test.com' }]
                 }]
             };
+
             mockLoadConfiguration.mockReturnValue(testConfig);
             mockIsTeamRepository.mockReturnValue(true);
             mockGetPullRequestInfo.mockResolvedValue({
@@ -180,10 +182,11 @@ describe('assign-reviewer tool', () => {
                 author: { login: 'author1' }
             });
             mockGetAvailableTeamMembers.mockReturnValue([]);
-            
+            mockGetMembers.mockResolvedValue([
+                { name: 'Member 1', nickname_github: 'author1', email: 'member1@test.com' }
+            ]);
     
             const result = await handlerFn({ repo: 'owner/test-repo', pr_number: 1 });
-            
     
             expect(result).toBeDefined();
             expect(result.content[0].type).toBe('text');

@@ -1,5 +1,6 @@
-import { TeamConfig, TeamMember } from '../types/index.js';
+import { Config, TeamConfig, TeamMember } from '../types/index.js';
 import { createLogger } from '../utils/logger.js';
+import { TeamProvider } from '../interfaces/team-provider.js';
 
 const teamLogger = createLogger('review_assign_service', 'team');
 
@@ -53,3 +54,46 @@ export const getAvailableTeamMembers = (team: TeamConfig, prAuthor: string): Tea
 
   return availableMembers;
 };
+
+/**
+ * Obtiene la lista de miembros de un equipo configurado en el servidor MCP
+ * con la opción de detectar automáticamente los miembros del equipo en github
+ * @param config Configuración del servidor MCP
+ * @param teamProvider Proveedor de miembros de equipo
+ * @returns Lista de miembros de un equipo
+ */
+export const getMembers = async (config: Config, teamProvider: TeamProvider): Promise<TeamConfig[]> => {
+    const teams: TeamConfig[] = config.auto_detect_members_from_github
+        ? await Promise.all(
+            config.teams.map(async (team) => {
+                if (!team.org || !team.team_slug) {
+                    return team;
+                }
+
+                const autoMembers = await teamProvider.getMembers(team.org, team.team_slug);
+                const mapByNickname = new Map<string, TeamMember>();
+                for (const member of autoMembers) {
+                    mapByNickname.set(member.nickname_github.toLowerCase(), { ...member });
+                }
+                for (const member of team.members ?? []) {
+                    const key = member.nickname_github.toLowerCase();
+                    if (mapByNickname.has(key)) {
+                        const base = mapByNickname.get(key)!;
+                        mapByNickname.set(key, {
+                            nickname_github: base.nickname_github,
+                            name: member.name || base.name,
+                            email: member.email || base.email,
+                            workloadFactor: member.workloadFactor ?? base.workloadFactor,
+                        });
+                    } else {
+                        mapByNickname.set(key, { ...member });
+                    }
+                }
+                const mergedMembers = Array.from(mapByNickname.values());
+                return { ...team, members: mergedMembers } as TeamConfig;
+            })
+        )
+        : config.teams;
+
+    return teams;
+}
