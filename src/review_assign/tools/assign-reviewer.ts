@@ -57,7 +57,8 @@ export const registerAssignReviewerTool = (server: McpServer) => {
 
                 const actualThreadKey = thread_key || `review-pr-${pr_number}`;
                 
-                const availableMembers: TeamMember[] = getAvailableTeamMembers(matchingTeam, prAuthor);
+                const excludeMembersByNickname = matchingTeam.exclude_members_by_nickname?.concat([prAuthor]) || [prAuthor];
+                const availableMembers: TeamMember[] = getAvailableTeamMembers(matchingTeam, excludeMembersByNickname);
                 
                 if (availableMembers.length === 0) {
                     assignReviewerLogger.warn(`No hay miembros disponibles para revisión`, { 

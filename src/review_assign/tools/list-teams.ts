@@ -28,7 +28,13 @@ export const registerListTeamsTool = (server: McpServer) => {
                         text: JSON.stringify({
                             teams: teams.map((team: TeamConfig) => ({
                                 name: team.team_name,
-                                members: team.members.map((member) => member.nickname_github),
+                                members: team.members
+                                    .filter((member) => 
+                                        !team.exclude_members_by_nickname?.find(nickname => 
+                                            nickname.toLowerCase() === member.nickname_github.toLowerCase()
+                                        )
+                                    )
+                                    .map((member) => member.nickname_github),
                                 repositories: team.repositories
                             }))
                         }, null, 2) 
