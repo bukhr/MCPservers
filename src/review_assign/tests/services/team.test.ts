@@ -49,10 +49,31 @@ describe('team service', () => {
     const teamWithoutMembers = {...team, members: []};
     const teamWithOneMember = {...team, members: [team.members[0]]};
     const teamWithThreeMembers = {...team, members: [...team.members, {name: 'memberTest3', email: 'memberTest3@test.com', nickname_github: 'testuser3'}]};
-    expect(teamService.getAvailableTeamMembers(team, "testuser2")).toHaveLength(1);
-    expect(teamService.getAvailableTeamMembers(teamWithThreeMembers, "testuser2")).toHaveLength(2);
-    expect(teamService.getAvailableTeamMembers(teamWithOneMember, "testuser")).toEqual([]);
-    expect(teamService.getAvailableTeamMembers(teamWithoutMembers, "testuser")).toEqual([]);
+    expect(teamService.getAvailableTeamMembers(team, ["testuser2"])).toHaveLength(1);
+    expect(teamService.getAvailableTeamMembers(teamWithThreeMembers, ["testuser2"])).toHaveLength(2);
+    expect(teamService.getAvailableTeamMembers(teamWithOneMember, ["testuser"])).toEqual([]);
+    expect(teamService.getAvailableTeamMembers(teamWithoutMembers, ["testuser"])).toEqual([]);
+  });
+
+  test('getAvailableTeamMembers with exclude_members_by_nickname', () => {
+    const teamWithExcludedMembers = {
+      ...team,
+      exclude_members_by_nickname: ['testuser2']
+    };
+    const teamWithAllExcluded = {
+      ...team,
+      exclude_members_by_nickname: ['testuser', 'testuser2']
+    };
+    const teamWithCaseSensitiveExclusion = {
+      ...team,
+      exclude_members_by_nickname: ['TESTUSER']
+    };
+
+    expect(teamService.getAvailableTeamMembers(teamWithExcludedMembers, ["author"])).toHaveLength(1);
+    expect(teamService.getAvailableTeamMembers(teamWithExcludedMembers, ["author"])[0].nickname_github).toBe('testuser');
+    expect(teamService.getAvailableTeamMembers(teamWithAllExcluded, ["author"])).toHaveLength(0);
+    expect(teamService.getAvailableTeamMembers(teamWithCaseSensitiveExclusion, ["author"])).toHaveLength(1);
+    expect(teamService.getAvailableTeamMembers(teamWithCaseSensitiveExclusion, ["author"])[0].nickname_github).toBe('testuser2');
   });
 
   describe('getMembers', () => {
