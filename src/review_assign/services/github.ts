@@ -1,8 +1,9 @@
 import { execSync } from 'child_process';
 import { createLogger } from '../utils/logger.js';
-import { PullRequestInfo, ReviewedPR } from '../types/index.js';
+import { PullRequestInfo, ReviewedPR, TeamMember } from '../types/index.js';
 
 const githubLogger = createLogger('review_assign_service', 'github');
+const teamMembersCache = new Map<string, { data: TeamMember[]; fetchedAt: number }>();
 
 export const assignReviewer = async (repo: string, prNumber: number, reviewer: string): Promise<void> => {
     try {
@@ -39,4 +40,51 @@ export const searchReviewedPRs = async (username: string, daysAgo: number): Prom
         githubLogger.error(`Error al buscar PRs revisados por ${username}: ${error}`);
         return [];
     }
+}
+
+const makeCacheKey = (org: string, teamSlug: string) => `${org}#${teamSlug}`;
+
+const getTeamMembersLoginList = async (org: string, teamSlug: string): Promise<string[]> => {
+    try {
+        const listCmd = `gh api /orgs/${org}/teams/${teamSlug}/members -q '.[].login'`;
+        const loginsRaw = execSync(listCmd).toString().trim();
+        const logins = loginsRaw
+            .split(/\r?\n/)
+            .map(l => l.trim())
+            .filter(Boolean);
+
+        return logins;
+    } catch (error) {
+        githubLogger.error(`Error al obtener miembros del team ${teamSlug} en ${org}: ${error}`);
+        return [];
+    }
+}
+
+export const getTeamMembers = async (org: string, teamSlug: string): Promise<TeamMember[]> => {
+    const key = makeCacheKey(org, teamSlug);
+    const entry = teamMembersCache.get(key);
+
+    if (entry) {
+        return entry.data;
+    }
+
+    const logins = await getTeamMembersLoginList(org, teamSlug);
+    const members: TeamMember[] = [];
+    for (const login of logins) {
+        try {
+            const userCmd = `gh api /users/${login}`;
+            const userOutput = execSync(userCmd).toString();
+            const user = JSON.parse(userOutput) as { login: string; name?: string; email?: string };
+            members.push({
+                name: user.name || login,
+                email: user.email || '',
+                nickname_github: user.login,
+            });
+        } catch (innerErr) {
+            githubLogger.error(`No se pudo obtener perfil público para ${login}: ${innerErr}`);
+        }
+    }
+
+    teamMembersCache.set(key, { data: members, fetchedAt: Date.now() });
+    return members;
 }
