@@ -5,6 +5,12 @@ import { PullRequestInfo, ReviewedPR, TeamMember } from '../types/index.js';
 const githubLogger = createLogger('review_assign_service', 'github');
 const teamMembersCache = new Map<string, { data: TeamMember[]; fetchedAt: number }>();
 
+/**
+ * Asigna un revisor al PR
+ * @param repo Repositorio en formato owner/repo
+ * @param prNumber Número del PR
+ * @param reviewer Login del usuario de GitHub del revisor
+ */
 export const assignReviewer = async (repo: string, prNumber: number, reviewer: string): Promise<void> => {
     try {
         const cmd = `gh pr edit ${prNumber} --repo ${repo} --add-reviewer ${reviewer}`;
@@ -15,6 +21,12 @@ export const assignReviewer = async (repo: string, prNumber: number, reviewer: s
     }
 }
 
+/**
+ * Obtiene la información de un PR (título, url y autor)
+ * @param repo Repositorio en formato owner/repo
+ * @param prNumber Número del PR
+ * @returns Información del PR
+ */
 export const getPullRequestInfo = async (repo: string, prNumber: number): Promise<PullRequestInfo> => {
     try {
         const prInfoCmd = `gh pr view ${prNumber} --repo ${repo} --json title,url,author`;
@@ -26,6 +38,12 @@ export const getPullRequestInfo = async (repo: string, prNumber: number): Promis
     }
 }
 
+/**
+ * Busca los PRs revisados por un usuario en los últimos días
+ * @param username Nombre de usuario de GitHub
+ * @param daysAgo Número de días atrás
+ * @returns Lista de PRs revisados
+ */
 export const searchReviewedPRs = async (username: string, daysAgo: number): Promise<ReviewedPR[]> => {
     try {
         const daysAgoDate = new Date();
@@ -42,8 +60,20 @@ export const searchReviewedPRs = async (username: string, daysAgo: number): Prom
     }
 }
 
+/**
+ * Genera una clave para el cache de miembros del equipo
+ * @param org Nombre de la organización
+ * @param teamSlug Slug del equipo
+ * @returns Clave para el cache
+ */
 const makeCacheKey = (org: string, teamSlug: string) => `${org}#${teamSlug}`;
 
+/**
+ * Obtiene la lista de logins de los miembros del equipo
+ * @param org Nombre de la organización
+ * @param teamSlug Slug del equipo
+ * @returns Lista de logins de los miembros del equipo
+ */
 const getTeamMembersLoginList = async (org: string, teamSlug: string): Promise<string[]> => {
     try {
         const listCmd = `gh api /orgs/${org}/teams/${teamSlug}/members -q '.[].login'`;
@@ -60,6 +90,12 @@ const getTeamMembersLoginList = async (org: string, teamSlug: string): Promise<s
     }
 }
 
+/**
+ * Obtiene la lista de miembros del equipo
+ * @param org Nombre de la organización
+ * @param teamSlug Slug del equipo
+ * @returns Lista de miembros del equipo
+ */
 export const getTeamMembers = async (org: string, teamSlug: string): Promise<TeamMember[]> => {
     const key = makeCacheKey(org, teamSlug);
     const entry = teamMembersCache.get(key);

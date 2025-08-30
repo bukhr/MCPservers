@@ -7,6 +7,10 @@ import { GithubTeamProvider } from '../providers/github-team-provider.js';
 
 const listTeamsLogger = createLogger('review_assign_tool', 'list-teams');
 
+/**
+ * Lista los equipos configurados y sus miembros
+ * @returns Lista de equipos y sus miembros
+ */
 export const registerListTeamsTool = (server: McpServer) => {
     server.tool(
         'list_teams',

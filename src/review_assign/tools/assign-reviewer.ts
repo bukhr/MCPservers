@@ -11,6 +11,14 @@ import { GithubTeamProvider } from '../providers/github-team-provider.js';
 
 const assignReviewerLogger = createLogger('review_assign_tool', 'assign-reviewer');
 
+/**
+ * Asigna automáticamente un revisor a un PR basado en la carga de trabajo
+ * @param repo Nombre del repositorio en formato owner/repo
+ * @param pr_number Número del Pull Request
+ * @param days Número de días a considerar para el análisis (default: 15)
+ * @param thread_key Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)
+ * @returns Información sobre el revisor asignado y el estado de la operación
+ */
 export const registerAssignReviewerTool = (server: McpServer) => {
     server.tool(
         'assign_reviewer',
