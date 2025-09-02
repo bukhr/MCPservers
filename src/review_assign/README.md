@@ -14,6 +14,7 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para la asignació
 - Asignación automática de revisores basada en la carga de trabajo previa
 - Notificaciones a Google Chat a través de webhooks (opcional)
 - Configuración personalizable de equipos y repositorios
+- Detección automática de miembros de equipos desde GitHub
 
 ## Configuración
 
@@ -115,6 +116,48 @@ Se puede configurar el factor de carga de trabajo para cada miembro del equipo e
 El factor de carga de trabajo es un valor entre 0 y 1 que indica la proporción de la carga normal que puede manejar el miembro. Por ejemplo, un valor de 0.5 indica que el miembro puede manejar la mitad de la carga normal.
 
 Si no se especifica un factor de carga de trabajo, se asume 1.0 (carga normal).
+
+## Detección automática de miembros del equipo en GitHub
+
+El servidor MCP puede detectar automáticamente los miembros de un equipo directamente desde GitHub. Para habilitar esta funcionalidad, debes añadir los siguientes parámetros a tu configuración:
+
+```json
+{
+  "teams": [
+    {
+      "team_name": "Equipo Ejemplo",
+      "org": "nombre-de-la-organizacion",
+      "team_slug": "nombre-del-equipo",
+      "members": [
+        {
+          "name": "Nombre Personalizado",
+          "nickname_github": "usuario1",
+          "email": "correo@personalizado.com",
+          "workloadFactor": 0.5
+        }
+      ],
+      "repositories": ["bukhr/k8s", "bukhr/otro-repo"]
+    }
+  ],
+  "reviewDays": 15,
+  "auto_detect_members_from_github": true
+}
+```
+
+**Parámetros adicionales:**
+
+- `org`: El nombre de la organización de GitHub donde se encuentra el equipo.
+- `team_slug`: El slug o nombre de la URL del equipo en GitHub.
+- `auto_detect_members_from_github`: Activa la detección automática de miembros desde GitHub. Al estar activo este atributo hace opcional el uso del key `members` en los objetos de `teams`.
+
+**Funcionamiento:**
+
+- El sistema obtendrá la lista completa de miembros del equipo directamente desde GitHub.
+- Si un miembro ya está definido en la configuración, se preservarán sus datos personalizados (nombre, email, factor de carga).
+- Los nuevos miembros detectados en GitHub se agregarán automáticamente a la configuración.
+- Los nombres de usuario de GitHub se tratan sin distinguir entre mayúsculas y minúsculas para la combinación de datos.
+
+Esta funcionalidad es útil para mantener actualizada la lista de miembros del equipo sin necesidad de editar manualmente la configuración cuando hay cambios en los equipos de GitHub. Solo necesitas mantener manualmente los miembros que quieras personalizar (nombre, email, factor de carga).
 
 ## Herramientas disponibles
 

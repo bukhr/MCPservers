@@ -6,10 +6,19 @@ import { selectOptimalReviewer } from '../services/reviewer.js';
 import { sendChatNotification } from '../services/notification.js';
 import { TeamConfig, PullRequestInfo, Config, TeamMember, ReviewerSelection, ReviewerStats, ReviewedPR } from '../types/index.js';
 import { createLogger } from '../utils/logger.js';
-import { getAvailableTeamMembers, isTeamRepository } from '../services/team.js';
+import { getAvailableTeamMembers, isTeamRepository, getMembers } from '../services/team.js';
+import { GithubTeamProvider } from '../providers/github-team-provider.js';
 
 const assignReviewerLogger = createLogger('review_assign_tool', 'assign-reviewer');
 
+/**
+ * Asigna automáticamente un revisor a un PR basado en la carga de trabajo
+ * @param repo Nombre del repositorio en formato owner/repo
+ * @param pr_number Número del Pull Request
+ * @param days Número de días a considerar para el análisis (default: 15)
+ * @param thread_key Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)
+ * @returns Información sobre el revisor asignado y el estado de la operación
+ */
 export const registerAssignReviewerTool = (server: McpServer) => {
     server.tool(
         'assign_reviewer',
@@ -23,8 +32,11 @@ export const registerAssignReviewerTool = (server: McpServer) => {
         async ({ repo, pr_number, days = 15, thread_key }) => {
             try {
                 const config: Config = loadConfiguration();
+
+                const githubTeamProvider = new GithubTeamProvider();
+                const teams = await getMembers(config, githubTeamProvider);
                 
-                const matchingTeam = config.teams.find((team: TeamConfig) => isTeamRepository(team, repo));
+                const matchingTeam = teams.find((team: TeamConfig) => isTeamRepository(team, repo));
                 
                 if (!matchingTeam) {
                     assignReviewerLogger.warn(`Repositorio no configurado`, { repo });

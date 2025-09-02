@@ -12,6 +12,8 @@ export interface Repository {
 
 export interface TeamConfig {
     team_name: string;
+    team_slug?: string;
+    org?: string;
     members: TeamMember[];
     repositories: string[];
     webhook_url?: string;
@@ -20,6 +22,7 @@ export interface TeamConfig {
 export interface Config {
     teams: TeamConfig[];
     reviewDays: number;
+    auto_detect_members_from_github?: boolean;
 }
 
 export interface LogConfig {

@@ -2,6 +2,13 @@ import { TeamMember } from '../types/index.js';
 import { searchReviewedPRs } from './github.js';
 import { ReviewerSelection, ReviewerStats, ReviewedPR } from '../types/index.js';
 
+/**
+ * Cuenta el número de revisiones realizadas por un miembro en los últimos días
+ * @param member Miembro del equipo
+ * @param teamRepositories Repositorios del equipo
+ * @param days Número de días atrás
+ * @returns Número de revisiones realizadas por el miembro
+ */
 export const countMemberReviews = async (
     member: TeamMember, 
     teamRepositories: string[], 
@@ -25,6 +32,13 @@ export const countMemberReviews = async (
     }
 }
 
+/**
+ * Selecciona el revisor óptimo para un PR
+ * @param availableMembers Miembros disponibles para revisar
+ * @param teamRepositories Repositorios del equipo
+ * @param days Número de días atrás
+ * @returns Revisor óptimo y estadísticas de revisiones
+ */
 export const selectOptimalReviewer = async (
     availableMembers: TeamMember[], 
     teamRepositories: string[], 
