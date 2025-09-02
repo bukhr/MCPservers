@@ -205,6 +205,7 @@ Para excluir miembros, añade el parámetro `exclude_members_by_nickname` a tu c
     - `pr_number`: Número del Pull Request
     - `days`: (Opcional) Número de días a considerar para el análisis de carga (default: 15)
     - `thread_key`: (Opcional) Clave para agrupar mensajes en Google Chat (default: "review-pr-NUM")
+    - `exclude_nickname`: (Opcional) Nickname de GitHub a excluir solo para esta asignación
 
 - `list_teams`: Lista los equipos configurados y sus miembros
 
@@ -291,6 +292,34 @@ Respuesta:
   },
   "team": "Equipo Ejemplo",
   "thread_key": "llave-del-hilo"
+}
+```
+
+#### Excluir temporalmente a un miembro específico
+
+```text
+Asigna un revisor al PR #123 del repositorio bukhr/k8s excluyendo a "usuario2"
+```
+
+Respuesta:
+
+```json
+{
+  "status": "success",
+  "message": "Revisor asignado exitosamente: Nombre Completo (usuario)",
+  "pr": {
+    "number": 123,
+    "title": "Título del PR",
+    "url": "https://github.com/bukhr/k8s/pull/123",
+    "author": "autor-pr"
+  },
+  "reviewer": {
+    "name": "Nombre Completo",
+    "github": "usuario",
+    "email": "usuario@ejemplo.com"
+  },
+  "team": "Equipo Ejemplo",
+  "thread_key": "review-pr-123"
 }
 ```
 

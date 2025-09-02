@@ -69,11 +69,11 @@ describe('team service', () => {
       exclude_members_by_nickname: ['TESTUSER']
     };
 
-    expect(teamService.getAvailableTeamMembers(teamWithExcludedMembers, ["author"])).toHaveLength(1);
-    expect(teamService.getAvailableTeamMembers(teamWithExcludedMembers, ["author"])[0].nickname_github).toBe('testuser');
-    expect(teamService.getAvailableTeamMembers(teamWithAllExcluded, ["author"])).toHaveLength(0);
-    expect(teamService.getAvailableTeamMembers(teamWithCaseSensitiveExclusion, ["author"])).toHaveLength(1);
-    expect(teamService.getAvailableTeamMembers(teamWithCaseSensitiveExclusion, ["author"])[0].nickname_github).toBe('testuser2');
+    expect(teamService.getAvailableTeamMembers(teamWithExcludedMembers, teamWithExcludedMembers.exclude_members_by_nickname)).toHaveLength(1);
+    expect(teamService.getAvailableTeamMembers(teamWithExcludedMembers, teamWithExcludedMembers.exclude_members_by_nickname)[0].nickname_github).toBe('testuser');
+    expect(teamService.getAvailableTeamMembers(teamWithAllExcluded, teamWithAllExcluded.exclude_members_by_nickname)).toHaveLength(0);
+    expect(teamService.getAvailableTeamMembers(teamWithCaseSensitiveExclusion, teamWithCaseSensitiveExclusion.exclude_members_by_nickname)).toHaveLength(1);
+    expect(teamService.getAvailableTeamMembers(teamWithCaseSensitiveExclusion, teamWithCaseSensitiveExclusion.exclude_members_by_nickname)[0].nickname_github).toBe('testuser2');
   });
 
   describe('getMembers', () => {
