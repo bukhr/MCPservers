@@ -6,6 +6,7 @@ import { selectOptimalReviewer } from '../services/reviewer.js';
 import { sendChatNotification } from '../services/notification.js';
 import { TeamConfig, PullRequestInfo, Config, TeamMember, ReviewerSelection, ReviewerStats, ReviewedPR } from '../types/index.js';
 import { createLogger } from '../utils/logger.js';
+import { extractThreadNameFromUrl } from '../utils/google-chat.js'
 import { getAvailableTeamMembers, isTeamRepository, getMembers } from '../services/team.js';
 import { GithubTeamProvider } from '../providers/github-team-provider.js';
 
@@ -18,6 +19,7 @@ const assignReviewerLogger = createLogger('review_assign_tool', 'assign-reviewer
  * @param days Número de días a considerar para el análisis (default: 15)
  * @param exclude_nickname Nickname de GitHub a excluir solo para esta asignación (opcional)
  * @param thread_key Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)
+ * @param thread_url URL del hilo específico de Google Chat (prioriza sobre thread_key si es válida)
  * @returns Información sobre el revisor asignado y el estado de la operación
  */
 export const registerAssignReviewerTool = (server: McpServer) => {
@@ -28,10 +30,11 @@ export const registerAssignReviewerTool = (server: McpServer) => {
             repo: z.string().describe('Nombre del repositorio en formato owner/repo'),
             pr_number: z.number().describe('Número del Pull Request'),
             days: z.number().optional().describe('Número de días a considerar para el análisis (default: 15)'),
+            exclude_nickname: z.string().optional().describe('Nickname de GitHub a excluir solo para esta asignación'),
             thread_key: z.string().optional().describe('Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)'),
-            exclude_nickname: z.string().optional().describe('Nickname de GitHub a excluir solo para esta asignación')
+            thread_url: z.string().optional().describe('URL del hilo específico de Google Chat (prioriza sobre thread_key si es válida)')
         },
-        async ({ repo, pr_number, days = 15, thread_key, exclude_nickname }) => {
+        async ({ repo, pr_number, days = 15, exclude_nickname, thread_key, thread_url }) => {
             try {
                 const config: Config = loadConfiguration();
 
@@ -55,9 +58,9 @@ export const registerAssignReviewerTool = (server: McpServer) => {
                 const prTitle = prInfo.title;
                 const prUrl = prInfo.url;
                 const prAuthor = prInfo.author.login;
-                
 
-                const actualThreadKey = thread_key || `review-pr-${pr_number}`;
+                const threadNameFromUrl = extractThreadNameFromUrl(thread_url);
+                const actualThreadKey = threadNameFromUrl || thread_key || `review-pr-${pr_number}`;
                 
                 const extraExclusions = exclude_nickname ? [prAuthor, exclude_nickname] : [prAuthor];
                 const excludeMembersByNickname = matchingTeam.exclude_members_by_nickname?.concat(extraExclusions) || extraExclusions;
