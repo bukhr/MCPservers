@@ -16,6 +16,7 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para la asignació
 - Configuración personalizable de equipos y repositorios
 - Detección automática de miembros de equipos desde GitHub
 - Mensajes iniciales en Google Chat (opcional) para abrir hilos de revisión de PRs
+- Asignación automática de revisores a PRs con notificaciones en Google Chat en un hilo ya existente
 
 ## Configuración
 
@@ -168,6 +169,7 @@ Esta funcionalidad es útil para mantener actualizada la lista de miembros del e
     - `pr_number`: Número del Pull Request
     - `days`: (Opcional) Número de días a considerar para el análisis de carga (default: 15)
     - `thread_key`: (Opcional) Clave para agrupar mensajes en Google Chat (default: "review-pr-NUM")
+    - `thread_url`: (Opcional) URL del hilo específico de Google Chat. Si se especifica, tiene prioridad sobre `thread_key`. Formato de la URL: `https://chat.google.com/room/<space_id>/<thread_id>/<message_id>`
 
 - `open_review_thread`: Publica un mensaje en un hilo de Google Chat
   - Parámetros:
@@ -236,7 +238,7 @@ Respuesta:
 }
 ```
 
-#### En un hilo específico en Google Chat
+#### En un hilo específico en Google Chat (con ID)
 
 ```text
 Asigna un revisor al PR #123 del repositorio bukhr/k8s en el hilo con clave `llave-del-hilo`
@@ -261,6 +263,34 @@ Respuesta:
   },
   "team": "Equipo Ejemplo",
   "thread_key": "llave-del-hilo"
+}
+```
+
+#### En un hilo específico en Google Chat (con URL del hilo)
+
+```text
+Asigna un revisor al PR #123 del repositorio bukhr/k8s en el hilo por URL `https://chat.google.com/room/<space_id>/<thread_id>/<message_id>?cls=10`
+```
+
+Respuesta:
+
+```json
+{
+  "status": "success",
+  "message": "Revisor asignado exitosamente: Nombre Completo (usuario)",
+  "pr": {
+    "number": 123,
+    "title": "Título del PR",
+    "url": "https://github.com/bukhr/k8s/pull/123",
+    "author": "autor-pr"
+  },
+  "reviewer": {
+    "name": "Nombre Completo",
+    "github": "usuario",
+    "email": "usuario@ejemplo.com"
+  },
+  "team": "Equipo Ejemplo",
+  "thread_key": "spaces/space_id>/threads/<thread_id>"
 }
 ```
 
