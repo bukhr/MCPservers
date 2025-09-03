@@ -15,6 +15,7 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para la asignació
 - Notificaciones a Google Chat a través de webhooks (opcional)
 - Configuración personalizable de equipos y repositorios
 - Detección automática de miembros de equipos desde GitHub
+- Mensajes iniciales en Google Chat (opcional) para abrir hilos de revisión de PRs
 
 ## Configuración
 
@@ -168,6 +169,13 @@ Esta funcionalidad es útil para mantener actualizada la lista de miembros del e
     - `days`: (Opcional) Número de días a considerar para el análisis de carga (default: 15)
     - `thread_key`: (Opcional) Clave para agrupar mensajes en Google Chat (default: "review-pr-NUM")
 
+- `open_review_thread`: Publica un mensaje en un hilo de Google Chat
+  - Parámetros:
+    - `team`: (Opcional) Nombre del equipo configurado (TeamConfig.team_name). Si se especifica, tiene prioridad para resolver el webhook.
+    - `repo`: (Opcional) Repositorio en formato owner/repo (fallback para resolver el equipo correspondiente si no se especifica `team`).
+    - `thread_key`: Clave para agrupar mensajes en Google Chat
+    - `text`: Texto del mensaje a publicar
+
 - `list_teams`: Lista los equipos configurados y sus miembros
 
 ## Ejemplos de uso
@@ -235,6 +243,44 @@ Asigna un revisor al PR #123 del repositorio bukhr/k8s en el hilo con clave `lla
 ```
 
 Respuesta:
+
+```json
+{
+  "status": "success",
+  "message": "Revisor asignado exitosamente: Nombre Completo (usuario)",
+  "pr": {
+    "number": 123,
+    "title": "Título del PR",
+    "url": "https://github.com/bukhr/k8s/pull/123",
+    "author": "autor-pr"
+  },
+  "reviewer": {
+    "name": "Nombre Completo",
+    "github": "usuario",
+    "email": "usuario@ejemplo.com"
+  },
+  "team": "Equipo Ejemplo",
+  "thread_key": "llave-del-hilo"
+}
+```
+
+#### Abrir hilo con mensaje una mensaje inicial y asigna un revisor
+
+```text
+Asigna un revisor al PR #123 del repositorio bukhr/k8s en el hilo con clave `llave-del-hilo` con la mensaje inicial "Hola team, estoy abriendo este hilo para la revisión de los PRs del tema Ejemplo"
+```
+
+Respuesta (open_review_thread):
+
+```json
+{
+  "status": "success",
+  "thread_key": "llave-del-hilo",
+  "repo": null
+}
+```
+
+Respuesta (assign_reviewer):
 
 ```json
 {
