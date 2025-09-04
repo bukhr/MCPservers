@@ -193,6 +193,108 @@ describe('assign-reviewer tool', () => {
             expect(result.content[0].text).toContain('Error: No hay miembros disponibles');
         });
         
+        test('should exclude members by nickname when configured', async () => {
+            toolModule.registerAssignReviewerTool(mockServer);
+            const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
+            const testConfig = {
+                teams: [{
+                    team_name: 'Test Team',
+                    repositories: ['owner/test-repo'],
+                    webhook_url: 'https://webhook.test',
+                    members: [
+                        { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' },
+                        { name: 'Member 2', nickname_github: 'member2', email: 'member2@test.com' },
+                        { name: 'Member 3', nickname_github: 'member3', email: 'member3@test.com' }
+                    ],
+                    exclude_members_by_nickname: ['member3']
+                }]
+            };
+
+            mockLoadConfiguration.mockReturnValue(testConfig);
+            mockIsTeamRepository.mockReturnValue(true);
+            mockGetPullRequestInfo.mockResolvedValue({
+                title: 'Test PR',
+                url: 'https://github.com/owner/test-repo/pull/1',
+                author: { login: 'member1' }
+            });
+            
+            // Only member2 should be available as member1 is the author and member3 is excluded by config
+            const availableMember = { name: 'Member 2', nickname_github: 'member2', email: 'member2@test.com' };
+            mockGetAvailableTeamMembers.mockReturnValue([availableMember]);
+            mockGetMembers.mockResolvedValue(testConfig.teams);
+            mockSelectOptimalReviewer.mockResolvedValue({
+                selectedReviewer: availableMember,
+                reviewerStats: [{ member: availableMember, reviewCount: 5, normalizedCount: 5 }]
+            });
+    
+            const result = await handlerFn({ repo: 'owner/test-repo', pr_number: 1 });
+    
+            expect(result).toBeDefined();
+            expect(result.content[0].type).toBe('text');
+            
+            const responseContent = JSON.parse(result.content[0].text);
+            expect(responseContent.status).toBe('success');
+            expect(responseContent.reviewer.github).toBe('member2');
+            
+            // Verify that getAvailableTeamMembers was called with the correct parameters
+            expect(mockGetAvailableTeamMembers).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    exclude_members_by_nickname: ['member3']
+                }),
+                expect.arrayContaining(['member1'])
+            );
+        });
+        
+        test('should temporarily exclude member passed via exclude_nickname', async () => {
+            toolModule.registerAssignReviewerTool(mockServer);
+            const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
+            const testConfig = {
+                teams: [{
+                    team_name: 'Test Team',
+                    repositories: ['owner/test-repo'],
+                    webhook_url: 'https://webhook.test',
+                    members: [
+                        { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' },
+                        { name: 'Member 2', nickname_github: 'member2', email: 'member2@test.com' },
+                        { name: 'Member 3', nickname_github: 'member3', email: 'member3@test.com' }
+                    ]
+                }]
+            };
+
+            mockLoadConfiguration.mockReturnValue(testConfig);
+            mockIsTeamRepository.mockReturnValue(true);
+            mockGetPullRequestInfo.mockResolvedValue({
+                title: 'Test PR',
+                url: 'https://github.com/owner/test-repo/pull/1',
+                author: { login: 'member1' }
+            });
+
+            // exclude_nickname = 'member2' -> disponibles debería ser solo 'member3'
+            const availableMember = { name: 'Member 3', nickname_github: 'member3', email: 'member3@test.com' };
+            mockGetAvailableTeamMembers.mockReturnValue([availableMember]);
+            mockGetMembers.mockResolvedValue(testConfig.teams);
+            mockSelectOptimalReviewer.mockResolvedValue({
+                selectedReviewer: availableMember,
+                reviewerStats: [{ member: availableMember, reviewCount: 3, normalizedCount: 3 }]
+            });
+
+            const result = await handlerFn({ repo: 'owner/test-repo', pr_number: 1, exclude_nickname: 'member2' });
+
+            expect(result).toBeDefined();
+            expect(result.content[0].type).toBe('text');
+            const responseContent = JSON.parse(result.content[0].text);
+            expect(responseContent.status).toBe('success');
+            expect(responseContent.reviewer.github).toBe('member3');
+
+            // Verifica que getAvailableTeamMembers reciba exclusiones dinámicas [author, exclude_nickname]
+            expect(mockGetAvailableTeamMembers).toHaveBeenCalledWith(
+                expect.any(Object),
+                expect.arrayContaining(['member1', 'member2'])
+            );
+
+            expect(mockAssignReviewer).toHaveBeenCalledWith('owner/test-repo', 1, 'member3');
+        });
+        
         test('should handle errors during execution', async () => {
     
             toolModule.registerAssignReviewerTool(mockServer);

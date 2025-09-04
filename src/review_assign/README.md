@@ -15,6 +15,7 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para la asignació
 - Notificaciones a Google Chat a través de webhooks (opcional)
 - Configuración personalizable de equipos y repositorios
 - Detección automática de miembros de equipos desde GitHub
+- Exclusión manual de miembros del equipo para revisiones
 
 ## Configuración
 
@@ -159,6 +160,43 @@ El servidor MCP puede detectar automáticamente los miembros de un equipo direct
 
 Esta funcionalidad es útil para mantener actualizada la lista de miembros del equipo sin necesidad de editar manualmente la configuración cuando hay cambios en los equipos de GitHub. Solo necesitas mantener manualmente los miembros que quieras personalizar (nombre, email, factor de carga).
 
+## Excluir miembros del equipo manualmente
+
+Además de la detección automática, puedes configurar el servidor MCP para excluir específicamente ciertos miembros del equipo aunque estén en el equipo de GitHub. Esto es útil cuando un miembro del equipo no debe participar en las revisiones de código por algún motivo (vacaciones, licencia, u otras responsabilidades).
+
+Para excluir miembros, añade el parámetro `exclude_members_by_nickname` a tu configuración:
+
+```json
+{
+  "teams": [
+    {
+      "team_name": "Equipo Ejemplo",
+      "org": "nombre-de-la-organizacion",
+      "team_slug": "nombre-del-equipo",
+      "members": [
+        {
+          "name": "Nombre Personalizado",
+          "nickname_github": "usuario1",
+          "email": "correo@personalizado.com",
+          "workloadFactor": 0.5
+        }
+      ],
+      "repositories": ["bukhr/k8s", "bukhr/otro-repo"],
+      "exclude_members_by_nickname": ["usuario3", "usuario4"]
+    }
+  ],
+  "reviewDays": 15,
+  "auto_detect_members_from_github": true
+}
+```
+
+**Funcionamiento:**
+
+- Los miembros listados en `exclude_members_by_nickname` serán excluidos de las asignaciones de revisión.
+- Los nombres de usuario en esta lista deben coincidir con los valores de `nickname_github`.
+- Esta configuración funciona tanto con la detección automática habilitada como con la configuración manual de miembros.
+- La comparación de nombres de usuario no distingue entre mayúsculas y minúsculas.
+
 ## Herramientas disponibles
 
 - `assign_reviewer`: Asigna automáticamente un revisor a un PR basado en la carga de trabajo
@@ -167,6 +205,7 @@ Esta funcionalidad es útil para mantener actualizada la lista de miembros del e
     - `pr_number`: Número del Pull Request
     - `days`: (Opcional) Número de días a considerar para el análisis de carga (default: 15)
     - `thread_key`: (Opcional) Clave para agrupar mensajes en Google Chat (default: "review-pr-NUM")
+    - `exclude_nickname`: (Opcional) Nickname de GitHub a excluir solo para esta asignación
 
 - `list_teams`: Lista los equipos configurados y sus miembros
 
@@ -253,6 +292,34 @@ Respuesta:
   },
   "team": "Equipo Ejemplo",
   "thread_key": "llave-del-hilo"
+}
+```
+
+#### Excluir temporalmente a un miembro específico
+
+```text
+Asigna un revisor al PR #123 del repositorio bukhr/k8s excluyendo a "usuario2"
+```
+
+Respuesta:
+
+```json
+{
+  "status": "success",
+  "message": "Revisor asignado exitosamente: Nombre Completo (usuario)",
+  "pr": {
+    "number": 123,
+    "title": "Título del PR",
+    "url": "https://github.com/bukhr/k8s/pull/123",
+    "author": "autor-pr"
+  },
+  "reviewer": {
+    "name": "Nombre Completo",
+    "github": "usuario",
+    "email": "usuario@ejemplo.com"
+  },
+  "team": "Equipo Ejemplo",
+  "thread_key": "review-pr-123"
 }
 ```
 

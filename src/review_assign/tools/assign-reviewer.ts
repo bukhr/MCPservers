@@ -16,6 +16,7 @@ const assignReviewerLogger = createLogger('review_assign_tool', 'assign-reviewer
  * @param repo Nombre del repositorio en formato owner/repo
  * @param pr_number Número del Pull Request
  * @param days Número de días a considerar para el análisis (default: 15)
+ * @param exclude_nickname Nickname de GitHub a excluir solo para esta asignación (opcional)
  * @param thread_key Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)
  * @returns Información sobre el revisor asignado y el estado de la operación
  */
@@ -27,9 +28,10 @@ export const registerAssignReviewerTool = (server: McpServer) => {
             repo: z.string().describe('Nombre del repositorio en formato owner/repo'),
             pr_number: z.number().describe('Número del Pull Request'),
             days: z.number().optional().describe('Número de días a considerar para el análisis (default: 15)'),
-            thread_key: z.string().optional().describe('Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)')
+            thread_key: z.string().optional().describe('Clave para agrupar mensajes en Google Chat (default: review-pr-NUM)'),
+            exclude_nickname: z.string().optional().describe('Nickname de GitHub a excluir solo para esta asignación')
         },
-        async ({ repo, pr_number, days = 15, thread_key }) => {
+        async ({ repo, pr_number, days = 15, thread_key, exclude_nickname }) => {
             try {
                 const config: Config = loadConfiguration();
 
@@ -57,7 +59,9 @@ export const registerAssignReviewerTool = (server: McpServer) => {
 
                 const actualThreadKey = thread_key || `review-pr-${pr_number}`;
                 
-                const availableMembers: TeamMember[] = getAvailableTeamMembers(matchingTeam, prAuthor);
+                const extraExclusions = exclude_nickname ? [prAuthor, exclude_nickname] : [prAuthor];
+                const excludeMembersByNickname = matchingTeam.exclude_members_by_nickname?.concat(extraExclusions) || extraExclusions;
+                const availableMembers: TeamMember[] = getAvailableTeamMembers(matchingTeam, excludeMembersByNickname);
                 
                 if (availableMembers.length === 0) {
                     assignReviewerLogger.warn(`No hay miembros disponibles para revisión`, { 
