@@ -8,6 +8,37 @@ Este repositorio contiene únicamente implementaciones de referencia para el [Mo
 
 Estos servidores demuestran cómo el MCP puede ofrecer a los Modelos de Lenguaje Grande (LLMs) acceso seguro y controlado a repositorios de código y archivos en la nube.
 
+## Instalación
+
+Este repositorio incluye un workflow (Cascade) y script para instalar servidores MCP de Python y TypeScript con varias opciones.
+
+### Workflow de Instalación
+
+El workflow `/install-mcp` permite una instalación y configuración guiada de los servidores MCP.
+
+### Script de Instalación
+
+El script `./scripts/install.sh` permite instalar servidores MCP de Python y TypeScript con varias opciones:
+
+```sh
+# Mostrar ayuda y opciones disponibles
+./scripts/install.sh --help
+
+# Instalar todos los servidores
+./scripts/install.sh --all
+
+# Instalar sólo servidores específicos
+./scripts/install.sh git jira review_assign
+
+# Seleccionar servidores interactivamente
+./scripts/install.sh --interactive
+
+# Listar servidores disponibles
+./scripts/install.sh --list
+```
+
+El script detecta automáticamente los servidores disponibles y maneja la instalación de dependencias tanto para Python como para TypeScript.
+
 ## Uso
 
 Cada servidor MCP está implementado con el [SDK de TypeScript para MCP](https://github.com/modelcontextprotocol/typescript-sdk) o el [SDK de Python para MCP](https://github.com/modelcontextprotocol/python-sdk).
