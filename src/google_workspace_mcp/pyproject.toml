@@ -59,3 +59,28 @@ workspace-mcp = "main:main"
 [tool.setuptools]
 packages = [ "auth", "gcalendar", "core", "gdocs", "gdrive", "gmail", "gchat", "gsheets", "gforms", "gslides"]
 py-modules = [ "main"]
+
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.11"
+include = ["."]
+exclude = [
+  "**/__pycache__/**",
+  ".venv/**",
+  "**/.venv/**",
+  "**/site-packages/**",
+]
+reportArgumentType = "none"
+reportReturnType = "none"
+reportPossiblyUnboundVariable = "none"
+reportAttributeAccessIssue = "none"
+reportGeneralTypeIssues = "none"
+reportOperatorIssue = "none"
+reportCallIssue = "none"
+
+[tool.uv]
+dev-dependencies = [
+  "pyright>=1.1.389",
+  "ruff>=0.7.3",
+  "pytest>=8.0.0",
+]
