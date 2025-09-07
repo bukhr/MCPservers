@@ -28,6 +28,14 @@ pip install mcp-server-git
 python -m mcp_server_git
 ```
 
+## Pre-commit
+
+Para que el pre-commit funcione, debes ejecutar el siguiente comando en la raíz del repositorio:
+
+```sh
+npm install
+```
+
 ## Ejemplo de configuración para clientes MCP
 
 ```json
