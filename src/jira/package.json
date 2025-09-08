@@ -2,8 +2,13 @@
   "name": "jira_mcp",
   "version": "1.0.0",
   "description": "Jira MCP",
-  "main": "index.js",
+  "type": "module",
+  "main": "dist/main.js",
   "scripts": {
+    "build": "tsc && shx chmod +x dist/*.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
+    "start": "node dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Maximiliano Garcia",
@@ -15,6 +20,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
+    "shx": "^0.3.4",
     "typescript": "^5.8.3"
   }
 }
