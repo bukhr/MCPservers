@@ -128,8 +128,6 @@ Add this to your `claude_desktop_config.json`:
 }
 ```
 
-</details>
-
 #### Using docker
 
 - Note: replace '/Users/username' with the a path that you want to be accessible by this tool
@@ -143,8 +141,6 @@ Add this to your `claude_desktop_config.json`:
 }
 ```
 
-</details>
-
 #### Using pip installation
 
 ```json
@@ -155,8 +151,6 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
-
-</details>
 
 ### Usage with VS Code
 
