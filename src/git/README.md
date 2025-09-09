@@ -68,22 +68,27 @@ Please note that mcp-server-git is currently in early development. The functiona
      - `start_point` (string, optional): Starting point for the new branch
    - Returns: Confirmation of branch creation
 10. `git_checkout`
-   - Switches branches
-   - Inputs:
-     - `repo_path` (string): Path to Git repository
-     - `branch_name` (string): Name of branch to checkout
-   - Returns: Confirmation of branch switch
+
+    - Switches branches
+    - Inputs:
+      - `repo_path` (string): Path to Git repository
+      - `branch_name` (string): Name of branch to checkout
+    - Returns: Confirmation of branch switch
+
 11. `git_show`
-   - Shows the contents of a commit
-   - Inputs:
-     - `repo_path` (string): Path to Git repository
-     - `revision` (string): The revision (commit hash, branch name, tag) to show
-   - Returns: Contents of the specified commit
+
+    - Shows the contents of a commit
+    - Inputs:
+      - `repo_path` (string): Path to Git repository
+      - `revision` (string): The revision (commit hash, branch name, tag) to show
+    - Returns: Contents of the specified commit
+
 12. `git_init`
-   - Initializes a Git repository
-   - Inputs:
-     - `repo_path` (string): Path to directory to initialize git repo
-   - Returns: Confirmation of repository initialization
+
+    - Initializes a Git repository
+    - Inputs:
+      - `repo_path` (string): Path to directory to initialize git repo
+    - Returns: Confirmation of repository initialization
 
 ## Installation
 
@@ -96,13 +101,13 @@ use [`uvx`](https://docs.astral.sh/uv/guides/tools/) to directly run *mcp-server
 
 Alternatively you can install `mcp-server-git` via pip:
 
-```
+```bash
 pip install mcp-server-git
 ```
 
 After installation, you can run it as a script using:
 
-```
+```bash
 python -m mcp_server_git
 ```
 
@@ -112,8 +117,7 @@ python -m mcp_server_git
 
 Add this to your `claude_desktop_config.json`:
 
-<details>
-<summary>Using uvx</summary>
+#### Using uvx
 
 ```json
 "mcpServers": {
@@ -123,12 +127,12 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
+
 </details>
 
-<details>
-<summary>Using docker</summary>
+#### Using docker
 
-* Note: replace '/Users/username' with the a path that you want to be accessible by this tool
+- Note: replace '/Users/username' with the a path that you want to be accessible by this tool
 
 ```json
 "mcpServers": {
@@ -138,10 +142,10 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
+
 </details>
 
-<details>
-<summary>Using pip installation</summary>
+#### Using pip installation
 
 ```json
 "mcpServers": {
@@ -151,6 +155,7 @@ Add this to your `claude_desktop_config.json`:
   }
 }
 ```
+
 </details>
 
 ### Usage with VS Code
@@ -163,7 +168,7 @@ For quick installation, use one of the one-click install buttons below...
 
 For manual installation, add the following JSON block to your User Settings (JSON) file in VS Code. You can do this by pressing `Ctrl + Shift + P` and typing `Preferences: Open Settings (JSON)`.
 
-Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace. This will allow you to share the configuration with others. 
+Optionally, you can add it to a file called `.vscode/mcp.json` in your workspace. This will allow you to share the configuration with others.
 
 > Note that the `mcp` key is not needed in the `.vscode/mcp.json` file.
 
@@ -205,8 +210,7 @@ For Docker installation:
 
 Add to your Zed settings.json:
 
-<details>
-<summary>Using uvx</summary>
+#### Using uvx
 
 ```json
 "context_servers": [
@@ -218,10 +222,8 @@ Add to your Zed settings.json:
   }
 ],
 ```
-</details>
 
-<details>
-<summary>Using pip installation</summary>
+#### Using pip installation
 
 ```json
 "context_servers": {
@@ -233,19 +235,18 @@ Add to your Zed settings.json:
   }
 },
 ```
-</details>
 
 ## Debugging
 
 You can use the MCP inspector to debug the server. For uvx installations:
 
-```
+```bash
 npx @modelcontextprotocol/inspector uvx mcp-server-git
 ```
 
 Or if you've installed the package in a specific directory or are developing on it:
 
-```
+```bash
 cd path/to/servers/src/git
 npx @modelcontextprotocol/inspector uv run mcp-server-git
 ```
@@ -283,6 +284,7 @@ If you are doing local development, there are two ways to test your changes:
 ```
 
 ### UVX
+
 ```json
 {
 "mcpServers": {

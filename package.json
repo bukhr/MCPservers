@@ -16,9 +16,19 @@
     "build": "npm run build --workspaces",
     "watch": "npm run watch --workspaces",
     "publish-all": "npm publish --workspaces --access public",
-    "link-all": "npm link --workspaces"
+    "link-all": "npm link --workspaces",
+    "lint:md": "markdownlint src/**/*.md",
+    "prepare": "husky"
   },
   "dependencies": {
     "@modelcontextprotocol/server-gdrive": "*"
+  },
+  "devDependencies": {
+    "husky": ">=9",
+    "lint-staged": ">=11",
+    "markdownlint-cli": "^0.44.0"
+  },
+  "lint-staged": {
+    "src/**/*.md": "markdownlint"
   }
 }

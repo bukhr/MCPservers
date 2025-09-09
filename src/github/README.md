@@ -1,19 +1,18 @@
 # GitHub MCP Server
 
-**Deprecation Notice:** Development for this project has been moved to GitHub in the http://github.com/github/github-mcp-server repo.
+**Deprecation Notice:** Development for this project has been moved to GitHub in the <http://github.com/github/github-mcp-server> repo.
 
 ---
 
 MCP Server for the GitHub API, enabling file operations, repository management, search functionality, and more.
 
-### Features
+## Features
 
 - **Automatic Branch Creation**: When creating/updating files or pushing changes, branches are automatically created if they don't exist
 - **Comprehensive Error Handling**: Clear error messages for common issues
 - **Git History Preservation**: Operations maintain proper Git history without force pushing
 - **Batch Operations**: Support for both single-file and multi-file operations
 - **Advanced Search**: Support for searching code, issues/PRs, and users
-
 
 ## Tools
 
@@ -175,115 +174,127 @@ MCP Server for the GitHub API, enabling file operations, repository management, 
     - Returns: User search results
 
 16. `list_commits`
-   - Gets commits of a branch in a repository
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `page` (optional string): page number
-     - `per_page` (optional string): number of record per page
-     - `sha` (optional string): branch name
-   - Returns: List of commits
+
+    - Gets commits of a branch in a repository
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `page` (optional string): page number
+      - `per_page` (optional string): number of record per page
+      - `sha` (optional string): branch name
+    - Returns: List of commits
 
 17. `get_issue`
-   - Gets the contents of an issue within a repository
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `issue_number` (number): Issue number to retrieve
-   - Returns: Github Issue object & details
+
+    - Gets the contents of an issue within a repository
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `issue_number` (number): Issue number to retrieve
+    - Returns: Github Issue object & details
 
 18. `get_pull_request`
-   - Get details of a specific pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-   - Returns: Pull request details including diff and review status
+
+    - Get details of a specific pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+    - Returns: Pull request details including diff and review status
 
 19. `list_pull_requests`
-   - List and filter repository pull requests
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `state` (optional string): Filter by state ('open', 'closed', 'all')
-     - `head` (optional string): Filter by head user/org and branch
-     - `base` (optional string): Filter by base branch
-     - `sort` (optional string): Sort by ('created', 'updated', 'popularity', 'long-running')
-     - `direction` (optional string): Sort direction ('asc', 'desc')
-     - `per_page` (optional number): Results per page (max 100)
-     - `page` (optional number): Page number
-   - Returns: Array of pull request details
+
+    - List and filter repository pull requests
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `state` (optional string): Filter by state ('open', 'closed', 'all')
+      - `head` (optional string): Filter by head user/org and branch
+      - `base` (optional string): Filter by base branch
+      - `sort` (optional string): Sort by ('created', 'updated', 'popularity', 'long-running')
+      - `direction` (optional string): Sort direction ('asc', 'desc')
+      - `per_page` (optional number): Results per page (max 100)
+      - `page` (optional number): Page number
+    - Returns: Array of pull request details
 
 20. `create_pull_request_review`
-   - Create a review on a pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-     - `body` (string): Review comment text
-     - `event` (string): Review action ('APPROVE', 'REQUEST_CHANGES', 'COMMENT')
-     - `commit_id` (optional string): SHA of commit to review
-     - `comments` (optional array): Line-specific comments, each with:
-       - `path` (string): File path
-       - `position` (number): Line position in diff
-       - `body` (string): Comment text
-   - Returns: Created review details
+
+    - Create a review on a pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+      - `body` (string): Review comment text
+      - `event` (string): Review action ('APPROVE', 'REQUEST_CHANGES', 'COMMENT')
+      - `commit_id` (optional string): SHA of commit to review
+      - `comments` (optional array): Line-specific comments, each with:
+        - `path` (string): File path
+        - `position` (number): Line position in diff
+        - `body` (string): Comment text
+    - Returns: Created review details
 
 21. `merge_pull_request`
-   - Merge a pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-     - `commit_title` (optional string): Title for merge commit
-     - `commit_message` (optional string): Extra detail for merge commit
-     - `merge_method` (optional string): Merge method ('merge', 'squash', 'rebase')
-   - Returns: Merge result details
+
+    - Merge a pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+      - `commit_title` (optional string): Title for merge commit
+      - `commit_message` (optional string): Extra detail for merge commit
+      - `merge_method` (optional string): Merge method ('merge', 'squash', 'rebase')
+    - Returns: Merge result details
 
 22. `get_pull_request_files`
-   - Get the list of files changed in a pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-   - Returns: Array of changed files with patch and status details
+
+    - Get the list of files changed in a pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+    - Returns: Array of changed files with patch and status details
 
 23. `get_pull_request_status`
-   - Get the combined status of all status checks for a pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-   - Returns: Combined status check results and individual check details
+
+    - Get the combined status of all status checks for a pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+    - Returns: Combined status check results and individual check details
 
 24. `update_pull_request_branch`
-   - Update a pull request branch with the latest changes from the base branch (equivalent to GitHub's "Update branch" button)
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-     - `expected_head_sha` (optional string): The expected SHA of the pull request's HEAD ref
-   - Returns: Success message when branch is updated
+
+    - Update a pull request branch with the latest changes from the base branch (equivalent to GitHub's "Update branch" button)
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+      - `expected_head_sha` (optional string): The expected SHA of the pull request's HEAD ref
+    - Returns: Success message when branch is updated
 
 25. `get_pull_request_comments`
-   - Get the review comments on a pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-   - Returns: Array of pull request review comments with details like the comment text, author, and location in the diff
+
+    - Get the review comments on a pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+    - Returns: Array of pull request review comments with details like the comment text, author, and location in the diff
 
 26. `get_pull_request_reviews`
-   - Get the reviews on a pull request
-   - Inputs:
-     - `owner` (string): Repository owner
-     - `repo` (string): Repository name
-     - `pull_number` (number): Pull request number
-   - Returns: Array of pull request reviews with details like the review state (APPROVED, CHANGES_REQUESTED, etc.), reviewer, and review body
+
+    - Get the reviews on a pull request
+    - Inputs:
+      - `owner` (string): Repository owner
+      - `repo` (string): Repository name
+      - `pull_number` (number): Pull request number
+    - Returns: Array of pull request reviews with details like the review state (APPROVED, CHANGES_REQUESTED, etc.), reviewer, and review body
 
 ## Search Query Syntax
 
 ### Code Search
+
 - `language:javascript`: Search by programming language
 - `repo:owner/name`: Search in specific repository
 - `path:app/src`: Search in specific path
@@ -291,6 +302,7 @@ MCP Server for the GitHub API, enabling file operations, repository management, 
 - Example: `q: "import express" language:typescript path:src/`
 
 ### Issues Search
+
 - `is:issue` or `is:pr`: Filter by type
 - `is:open` or `is:closed`: Filter by state
 - `label:bug`: Search by label
@@ -298,6 +310,7 @@ MCP Server for the GitHub API, enabling file operations, repository management, 
 - Example: `q: "memory leak" is:issue is:open label:bug`
 
 ### Users Search
+
 - `type:user` or `type:org`: Filter by account type
 - `followers:>1000`: Filter by followers
 - `location:London`: Search by location
@@ -308,17 +321,21 @@ For detailed search syntax, see [GitHub's searching documentation](https://docs.
 ## Setup
 
 ### Personal Access Token
+
 [Create a GitHub Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) with appropriate permissions:
-   - Go to [Personal access tokens](https://github.com/settings/tokens) (in GitHub Settings > Developer settings)
-   - Select which repositories you'd like this token to have access to (Public, All, or Select)
-   - Create a token with the `repo` scope ("Full control of private repositories")
-     - Alternatively, if working only with public repositories, select only the `public_repo` scope
-   - Copy the generated token
+
+- Go to [Personal access tokens](https://github.com/settings/tokens) (in GitHub Settings > Developer settings)
+- Select which repositories you'd like this token to have access to (Public, All, or Select)
+- Create a token with the `repo` scope ("Full control of private repositories")
+  - Alternatively, if working only with public repositories, select only the `public_repo` scope
+- Copy the generated token
 
 ### Usage with Claude Desktop
+
 To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
 
 #### Docker
+
 ```json
 {
   "mcpServers": {
@@ -366,7 +383,6 @@ For quick installation, use one of the installation buttons below:
 [![Install with NPX in VS Code](https://img.shields.io/badge/VS_Code-NPM-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=github&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22github_token%22%2C%22description%22%3A%22GitHub%20Personal%20Access%20Token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40modelcontextprotocol%2Fserver-github%22%5D%2C%22env%22%3A%7B%22GITHUB_PERSONAL_ACCESS_TOKEN%22%3A%22%24%7Binput%3Agithub_token%7D%22%7D%7D) [![Install with NPX in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-NPM-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=github&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22github_token%22%2C%22description%22%3A%22GitHub%20Personal%20Access%20Token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22%40modelcontextprotocol%2Fserver-github%22%5D%2C%22env%22%3A%7B%22GITHUB_PERSONAL_ACCESS_TOKEN%22%3A%22%24%7Binput%3Agithub_token%7D%22%7D%7D&quality=insiders)
 
 [![Install with Docker in VS Code](https://img.shields.io/badge/VS_Code-Docker-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=github&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22github_token%22%2C%22description%22%3A%22GitHub%20Personal%20Access%20Token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22mcp%2Fgithub%22%5D%2C%22env%22%3A%7B%22GITHUB_PERSONAL_ACCESS_TOKEN%22%3A%22%24%7Binput%3Agithub_token%7D%22%7D%7D) [![Install with Docker in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Docker-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=github&inputs=%5B%7B%22type%22%3A%22promptString%22%2C%22id%22%3A%22github_token%22%2C%22description%22%3A%22GitHub%20Personal%20Access%20Token%22%2C%22password%22%3Atrue%7D%5D&config=%7B%22command%22%3A%22docker%22%2C%22args%22%3A%5B%22run%22%2C%22-i%22%2C%22--rm%22%2C%22mcp%2Fgithub%22%5D%2C%22env%22%3A%7B%22GITHUB_PERSONAL_ACCESS_TOKEN%22%3A%22%24%7Binput%3Agithub_token%7D%22%7D%7D&quality=insiders)
-
 
 For manual installation, add the following JSON block to your User Settings (JSON) file in VS Code. You can do this by pressing `Ctrl + Shift + P` and typing `Preferences: Open User Settings (JSON)`.
 

@@ -1,0 +1,33 @@
+name: Validate documentation
+
+on:
+  pull_request:
+
+jobs:
+  sync-dev-center:
+    runs-on: ubuntu-latest
+    env:
+      SCRIPTS_PATH: scripts/developer_center
+      SYNC_MARKDOWN_TARGET_PATH: "buk-webapp/docs/windsurf/mcp-servers"
+      SYNC_SSH: ${{ secrets.SYNC_SSH }}
+      SYNC_MARKDOWN_FILE_PATTERN: '{src/**/*.md}'
+    steps:
+    - name: Clone MCPservers repo
+      uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 2
+
+    - name: Check documentation changes
+      run: |
+        result=$(ruby ${{ env.SCRIPTS_PATH }}/check_docs_changes.rb)
+        echo "$result" >> $GITHUB_ENV
+        if [[ "$result" == "DOC_SYNC=true" ]]; then
+          echo "Documentation changes detected."
+        elif [[ "$result" == "DOC_SYNC=false" ]]; then
+          echo "No documentation changes detected."
+        fi
+    - name: Markdownlint
+      if: env.DOC_SYNC == 'true'
+      run: |
+        npm install --include dev --no-workspaces
+        npm run lint:md
