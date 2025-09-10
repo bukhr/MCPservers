@@ -17,8 +17,7 @@
     "watch": "npm run watch --workspaces",
     "publish-all": "npm publish --workspaces --access public",
     "link-all": "npm link --workspaces",
-    "lint:md": "markdownlint src/**/*.md",
-    "prepare": "husky"
+    "lint:md": "markdownlint src/**/*.md"
   },
   "dependencies": {
     "@modelcontextprotocol/server-gdrive": "*"
