@@ -110,7 +110,9 @@ export const registerAssignReviewerTool = (server: McpServer) => {
                     name: stat.member.name,
                     github: stat.member.nickname_github,
                     email: stat.member.email,
-                    reviews_count: stat.normalizedCount
+                    completed_reviews: stat.reviewCount,
+                    pending_reviews: stat.pendingReviewCount,
+                    weighted_score: stat.normalizedCount
                 }));
                 
                 return {
@@ -133,7 +135,8 @@ export const registerAssignReviewerTool = (server: McpServer) => {
                             team: matchingTeam.team_name,
                             thread_key: actualThreadKey,
                             selection_criteria: {
-                                method: "Menor carga de trabajo en los últimos " + days + " días",
+                                method: "Menor carga de trabajo considerando revisiones completadas en los últimos " + days + " días y revisiones pendientes",
+                                weighting: "Las revisiones pendientes tienen un peso doble en el cálculo de carga",
                                 available_reviewers: reviewersInfo
                             }
                         }, null, 2) 

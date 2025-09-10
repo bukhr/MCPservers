@@ -1,6 +1,6 @@
 import { execSync } from 'child_process';
 import { createLogger } from '../utils/logger.js';
-import { PullRequestInfo, ReviewedPR, TeamMember } from '../types/index.js';
+import { PullRequestInfo, ReviewedPR, PendingReviewPR, TeamMember } from '../types/index.js';
 
 const githubLogger = createLogger('review_assign_service', 'github');
 const teamMembersCache = new Map<string, { data: TeamMember[]; fetchedAt: number }>();
@@ -56,6 +56,25 @@ export const searchReviewedPRs = async (username: string, daysAgo: number): Prom
         return JSON.parse(output);
     } catch (error) {
         githubLogger.error(`Error al buscar PRs revisados por ${username}: ${error}`);
+        return [];
+    }
+}
+
+/**
+ * Busca los PRs pendientes de revisión por un usuario
+ * @param username Nombre de usuario de GitHub
+ * @returns Lista de PRs pendientes de revisión
+ */
+export const searchPendingReviewPRs = async (username: string): Promise<PendingReviewPR[]> => {
+    try {
+        // Busca PRs abiertos donde el usuario está asignado como revisor y que aún requieren revisión
+        const query = `"is:open review-requested:${username} -review:required"`;
+        const cmd = `gh search prs ${query} --json number,repository,url,title,requestedReviewers --limit 100`;
+        const output = execSync(cmd).toString();
+        
+        return JSON.parse(output);
+    } catch (error) {
+        githubLogger.error(`Error al buscar PRs pendientes de revisión para ${username}: ${error}`);
         return [];
     }
 }

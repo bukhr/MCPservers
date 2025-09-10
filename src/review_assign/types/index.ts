@@ -35,6 +35,7 @@ export interface LogConfig {
 export interface ReviewerStats {
     member: TeamMember;
     reviewCount: number;
+    pendingReviewCount: number;
     normalizedCount: number;
 }
 
@@ -53,4 +54,18 @@ export interface ReviewedPR {
     repository: { name: string, nameWithOwner: string };
     url: string;
     title: string;
+}
+
+export interface PendingReviewPR {
+    number: number;
+    repository: { name: string, nameWithOwner: string };
+    url: string;
+    title: string;
+    requestedReviewers?: { login: string }[];
+}
+
+export interface LastReviewer {
+    repository: string;
+    nickname_github: string;
+    assignedAt: number;
 }
