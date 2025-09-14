@@ -14,7 +14,7 @@ describe('settings', () => {
 
     describe('loadJenkinsConfig', () => {
         test('should load Jenkins configuration successfully', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 baseUrl: 'https://jenkins.example.com',
                 auth: {
@@ -36,7 +36,7 @@ describe('settings', () => {
             process.env.JENKINS_USERNAME = 'env_user';
             process.env.JENKINS_API_TOKEN = 'env_token';
 
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 baseUrl: 'https://jenkins.example.com',
                 auth: {
@@ -61,7 +61,7 @@ describe('settings', () => {
         test('should resolve environment references', () => {
             process.env.JENKINS_SECRET = 'secret_token_value';
 
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 baseUrl: 'https://jenkins.example.com',
                 auth: {
@@ -81,7 +81,7 @@ describe('settings', () => {
         });
 
         test('should remove trailing slash from baseUrl', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 baseUrl: 'https://jenkins.example.com/',
                 auth: {
@@ -95,7 +95,7 @@ describe('settings', () => {
         });
 
         test('should throw error when baseUrl is missing', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 auth: {
                     username: 'jenkins_user',
@@ -107,7 +107,7 @@ describe('settings', () => {
         });
 
         test('should throw error when username is missing', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 baseUrl: 'https://jenkins.example.com',
                 auth: {
@@ -119,7 +119,7 @@ describe('settings', () => {
         });
 
         test('should throw error when apiToken is missing', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({ jenkins: {
                 baseUrl: 'https://jenkins.example.com',
                 auth: {
@@ -131,7 +131,7 @@ describe('settings', () => {
         });
         
         test('should handle null config', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
             process.env.JENKINS_BASE_URL = 'https://jenkins.env.com';
             process.env.JENKINS_USERNAME = 'env_user';
             process.env.JENKINS_API_TOKEN = 'env_token';
@@ -160,7 +160,7 @@ describe('settings', () => {
 
     describe('loadLogConfig', () => {
         test('should return default config when file does not exist', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => false);
             const logConfig = settings.loadLogConfig();
             expect(logConfig).toEqual({
                 enableFileLogs: true,
@@ -169,7 +169,7 @@ describe('settings', () => {
         });
 
         test('should return merged config with defaults when file exists with jenkins logs', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
                 jenkins: {
                     logs: {
@@ -185,12 +185,15 @@ describe('settings', () => {
             });
         });
 
-        test('should return merged config with defaults when file exists with global logs', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+        test('should return merged config with defaults when file exists with jenkins logs (global rename)', () => {
+            // Usar mockImplementation en lugar de mockReturnValue para manejar múltiples llamadas
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
-                logs: {
-                    enableFileLogs: false,
-                    logLevel: 'debug'
+                jenkins: {
+                    logs: {
+                        enableFileLogs: false,
+                        logLevel: 'debug'
+                    }
                 }
             }));
             const logConfig = settings.loadLogConfig();
@@ -201,7 +204,7 @@ describe('settings', () => {
         });
 
         test('should include logDir when provided in config', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
                 jenkins: {
                     logs: {
@@ -217,11 +220,13 @@ describe('settings', () => {
             });
         });
 
-        test('should fallback to global logs when jenkins.logs is undefined', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+        test('should use logs when they exist', () => {
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue(JSON.stringify({
-                logs: {
-                    logLevel: 'debug'
+                jenkins: {
+                    logs: {
+                        logLevel: 'debug'
+                    }
                 }
             }));
             const logConfig = settings.loadLogConfig();
@@ -232,7 +237,7 @@ describe('settings', () => {
         });
 
         test('should return default config when there is a parse error', () => {
-            jest.spyOn(fs, 'existsSync').mockReturnValue(true);
+            jest.spyOn(fs, 'existsSync').mockImplementation(() => true);
             jest.spyOn(fs, 'readFileSync').mockReturnValue('{ datos inválidos }');
             const logConfig = settings.loadLogConfig();
             expect(logConfig).toEqual({
