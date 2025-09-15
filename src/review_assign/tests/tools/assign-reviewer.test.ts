@@ -143,6 +143,57 @@ describe('assign-reviewer tool', () => {
             expect(mockSendChatNotification).toHaveBeenCalled();
         });
         
+        test('should use thread_url to notify a specific Google Chat thread', async () => {
+
+            toolModule.registerAssignReviewerTool(mockServer);
+            const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
+            const testConfig = {
+                teams: [{
+                    team_name: 'Test Team',
+                    repositories: ['owner/test-repo'],
+                    webhook_url: 'https://webhook.test',
+                    members: [
+                        { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' }
+                    ]
+                }]
+            };
+
+            mockLoadConfiguration.mockReturnValue(testConfig);
+            mockIsTeamRepository.mockReturnValue(true);
+            mockGetPullRequestInfo.mockResolvedValue({
+                title: 'Test PR',
+                url: 'https://github.com/owner/test-repo/pull/3',
+                author: { login: 'author1' }
+            });
+            mockGetAvailableTeamMembers.mockReturnValue([
+                { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' }
+            ]);
+            mockSelectOptimalReviewer.mockResolvedValue({
+                selectedReviewer: { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' },
+                reviewerStats: [{ member: { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' }, reviewCount: 2, normalizedCount: 2 }]
+            });
+            mockGetMembers.mockResolvedValue([
+                { name: 'Member 1', nickname_github: 'member1', email: 'member1@test.com' }
+            ]);
+
+            const threadUrl = 'https://chat.google.com/room/AAQAqbENPfI/vPw78dsgWBE/vPw78dsgWBE?cls=10';
+            const expectedThreadName = 'spaces/AAQAqbENPfI/threads/vPw78dsgWBE';
+
+            const result = await handlerFn({ 
+                repo: 'owner/test-repo', 
+                pr_number: 3,
+                thread_url: threadUrl
+            });
+
+            expect(result).toBeDefined();
+            expect(result.content[0].type).toBe('text');
+            expect(JSON.parse(result.content[0].text)).toHaveProperty('status', 'success');
+
+            expect(mockSendChatNotification).toHaveBeenCalled();
+            const callArgs = (mockSendChatNotification as jest.Mock).mock.calls[0];
+            expect(callArgs[6]).toBe(expectedThreadName);
+        });
+        
         test('should handle repository not configured', async () => {
     
             toolModule.registerAssignReviewerTool(mockServer);

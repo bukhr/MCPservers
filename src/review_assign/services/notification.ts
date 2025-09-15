@@ -15,9 +15,13 @@ export const postChatMessage = async (
     text: string,
     logLabel: string
 ) => {
+    const threadPayload = threadKey?.startsWith('spaces/')
+        ? { name: threadKey }
+        : { threadKey };
+
     const payload = {
         text,
-        thread: { threadKey }
+        thread: threadPayload
     };
     const resp = await fetch(`${webhookUrl}&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD`, {
         method: 'POST',
