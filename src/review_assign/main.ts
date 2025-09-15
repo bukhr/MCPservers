@@ -2,6 +2,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { registerAssignReviewerTool } from './tools/assign-reviewer.js';
 import { registerListTeamsTool } from './tools/list-teams.js';
+import { registerOpenReviewThreadTool } from './tools/open-review-thread.js';
 import { appLogger } from './utils/logger.js';
 
 /**
@@ -20,6 +21,7 @@ const server = new McpServer({
 
 registerAssignReviewerTool(server);
 registerListTeamsTool(server);
+registerOpenReviewThreadTool(server);
 
 const transport = new StdioServerTransport();
 server.connect(transport);
