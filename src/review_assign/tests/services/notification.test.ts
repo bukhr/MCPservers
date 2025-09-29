@@ -33,7 +33,7 @@ describe('notification service', () => {
         jest.clearAllMocks();
     });    
 
-    test('sendChatNotification should send notification', async () => {
+    test('sendChatNotification should send assignment notification', async () => {
         mockFetch({ data: 'test' });
 
         const webhookUrl = 'test';
@@ -65,8 +65,8 @@ describe('notification service', () => {
             prUrl,
             threadKey
         );
-        expect(global.fetch).toHaveBeenCalled();
-        expect(mockInfoLogger).toHaveBeenCalledWith('Notificación enviada exitosamente', {
+        expect(global.fetch).toHaveBeenCalledTimes(1);
+        expect(mockInfoLogger).toHaveBeenCalledWith('Mensaje enviada exitosamente', {
             message: JSON.stringify(message)
         });
     });
@@ -87,7 +87,7 @@ describe('notification service', () => {
         expect(mockWarnLogger).toHaveBeenCalledWith('No se envió notificación: webhook_url no configurado');
     });
 
-    test('sendChatNotification should throw error', async () => {
+    test('sendChatNotification should log error on HTTP failure', async () => {
         mockFetch({ data: 'test' }, false, 500);
 
         await notificationService.sendChatNotification(
@@ -100,10 +100,10 @@ describe('notification service', () => {
             'test'
         );
         expect(global.fetch).toHaveBeenCalled();
-        expect(mockErrorLogger).toHaveBeenCalledWith('Error al enviar notificación', {
-            error: 'Error HTTP: 500',
+        expect(mockErrorLogger).toHaveBeenCalledWith('Error al enviar notificación', expect.objectContaining({
+            error: expect.stringContaining('Error HTTP al enviar mensaje: 500'),
             repo: 'test',
             pr: 'test'
-        });
+        }));
     });
 });
