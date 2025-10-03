@@ -157,7 +157,7 @@ def main():
 
         if args.transport == 'streamable-http':
             # The server is already configured with port and server_url in core/server.py
-            server.run(transport="streamable-http")
+            server.run(transport="streamable-http", host="0.0.0.0", port=port, path="/mcp")
         else:
             server.run()
     except KeyboardInterrupt:

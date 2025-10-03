@@ -34,10 +34,7 @@ _current_transport_mode = "stdio"  # Default to stdio
 
 # Basic MCP server instance
 server = FastMCP(
-    name="google_workspace",
-    server_url=f"{WORKSPACE_MCP_BASE_URI}:{WORKSPACE_MCP_PORT}/mcp",
-    port=WORKSPACE_MCP_PORT,
-    host="0.0.0.0"
+    name="google_workspace"
 )
 
 def set_transport_mode(mode: str):
@@ -127,7 +124,8 @@ async def oauth2_callback(request: Request) -> HTMLResponse:
 async def start_google_auth(
     service_name: str,
     user_google_email: str = USER_GOOGLE_EMAIL,
-    mcp_session_id: Optional[str] = Header(None, alias="Mcp-Session-Id")
+    mcp_session_id: Optional[str] = Header(None, alias="Mcp-Session-Id"),
+    **tool_kwargs
 ) -> str:
     """
     Initiates the Google OAuth 2.0 authentication flow for the specified user email and service.
@@ -154,6 +152,12 @@ async def start_google_auth(
     Returns:
         str: A detailed message for the LLM with the authorization URL and instructions to guide the user through the authentication process.
     """
+    # Fallback: some runtimes may pass the session id as a kwarg instead of header
+    if mcp_session_id is None and tool_kwargs:
+        mcp_session_id = tool_kwargs.get("Mcp-Session-Id") or tool_kwargs.get("mcp_session_id")
+        if mcp_session_id:
+            logger.info(f"Resolved mcp_session_id from tool kwargs: {mcp_session_id}")
+
     if not user_google_email or not isinstance(user_google_email, str) or '@' not in user_google_email:
         error_msg = "Invalid or missing 'user_google_email'. This parameter is required and must be a valid email address. LLM, please ask the user for their Google email address."
         logger.error(f"[start_google_auth] {error_msg}")
