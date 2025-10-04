@@ -3,12 +3,13 @@ import os from 'os';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { LogConfig, JenkinsConfig } from '../types/index.js';
+import { LogConfig, JenkinsConfig, Config } from '../types/index.js';
 
 const currentFilename = fileURLToPath(import.meta.url);
 const currentDirname = dirname(currentFilename);
 
-export const MCP_CONFIG_PATH = path.join(os.homedir(), '.codeium', 'windsurf', 'mcp_config.json');
+const MCP_CONFIG_PATH = path.join(os.homedir(), '.codeium', 'windsurf', 'mcp_config.json');
+const GEMINI_CONFIG_PATH = path.join(os.homedir(), '.gemini', 'settings.json');
 
 const DEFAULT_LOG_DIR = path.join(currentDirname, '../logs');
 
@@ -18,14 +19,35 @@ export const DEFAULT_LOG_CONFIG: LogConfig = {
 };
 
 /**
+ * Lee la configuración de Jenkins desde el archivo de configuración
+ * @param path Ruta del archivo de configuración
+ * @returns Configuración de Jenkins o null si no se encuentra el archivo
+ */
+const readConfigIfAvailable = (path: string): Config | null => {
+  if (fs.existsSync(path)) {
+    const raw = fs.readFileSync(path, 'utf-8');
+    const json = JSON.parse(raw);
+    return json.jenkins ? json : null;
+  }
+  return null;
+}
+
+/**
  * Lee la configuración de MCP desde el archivo de configuración
+ * Intenta leer primero de MCP_CONFIG_PATH y si no existe, de GEMINI_CONFIG_PATH
  * @returns Configuración de MCP o null si no se encuentra el archivo
  */
-function readMcpConfig(): any | null {
+const readMcpConfig = (): Config | null => {
   try {
-    if (!fs.existsSync(MCP_CONFIG_PATH)) return null;
-    const raw = fs.readFileSync(MCP_CONFIG_PATH, 'utf-8');
-    return JSON.parse(raw);
+    let config: Config | null = null;
+
+    config = readConfigIfAvailable(MCP_CONFIG_PATH);
+    
+    if (config === null) {
+      config = readConfigIfAvailable(GEMINI_CONFIG_PATH);
+    }
+
+    return config;
   } catch {
     return null;
   }
@@ -58,12 +80,14 @@ export const getLogDir = (): string => {
  */
 export const loadLogConfig = (): LogConfig => {
   try {
-    if (!fs.existsSync(MCP_CONFIG_PATH)) {
+    const config = readMcpConfig();
+
+    if (!config) {
       return DEFAULT_LOG_CONFIG;
     }
     
-    const config = readMcpConfig();
-    const logConfig = (config.jenkins?.logs) || config.logs || {};
+    // Solo buscar la configuración de logs dentro de jenkins
+    const logConfig: LogConfig | any = config.jenkins?.logs || {};
     
     return {
       enableFileLogs: logConfig.enableFileLogs !== undefined ? 
@@ -83,7 +107,7 @@ export const loadLogConfig = (): LogConfig => {
  */
 export const loadJenkinsConfig = (): JenkinsConfig => {
   const config = readMcpConfig();
-  const jenkinsConfig = config?.jenkins || {};
+  const jenkinsConfig: JenkinsConfig | any = config?.jenkins || {};
 
   const fileBaseUrl = resolveEnvRef(jenkinsConfig.baseUrl);
   const auth = jenkinsConfig.auth || {};

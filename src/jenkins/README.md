@@ -7,7 +7,8 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para interactuar c
 - [Requisitos previos](#requisitos-previos)
 - [Funcionalidades](#funcionalidades)
 - [Configuración](#configuración)
-- [Configuración en Windows](#configurar-en-windows)
+  - [Configuración en Windows](#configurar-en-windows)
+  - [Configuración en Gemini CLI](#configurar-en-gemini-cli)
 - [Variables de entorno soportadas](#variables-de-entorno-soportadas)
 - [Obtener API Token en Jenkins](#obtener-api-token-en-jenkins)
 - [Herramientas disponibles](#herramientas-disponibles)
@@ -75,7 +76,7 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para interactuar c
    - Normalmente el username es el correo electrónico de la cuenta que usas para acceder a Jenkins.
    - El API Token se puede obtener desde la interfaz de Jenkins.
 
-## Configurar en Windows
+### Configurar en Windows
 
 Cambia el archivo `~/.codeium/windsurf/mcp_config.json` a:
 
@@ -105,7 +106,9 @@ Cambia el archivo `~/.codeium/windsurf/mcp_config.json` a:
 }
 ```
 
-Reemplaza tal cual descrito anteriormente en la sección de [Configuración](#configuración).
+### Configurar en Gemini CLI
+
+Hace lo mismo que la configuración en [Configuración](#configuración) pero en el archivo `~/.gemini/settings.json`.
 
 ## Variables de entorno soportadas
 

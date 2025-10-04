@@ -1,5 +1,9 @@
 // Tipos para Jenkins MCP
 
+export interface Config {
+  jenkins: JenkinsConfig;
+}
+
 export interface LogConfig {
   enableFileLogs: boolean;
   logLevel: string;
@@ -10,6 +14,7 @@ export interface JenkinsConfig {
   baseUrl: string;
   username: string;
   apiToken: string;
+  logs?: LogConfig;
 }
 
 export interface JenkinsBuild {
