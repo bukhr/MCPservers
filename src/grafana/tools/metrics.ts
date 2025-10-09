@@ -27,7 +27,7 @@ export const registerMetricsTool = (server: McpServer): void => {
     },
     async ({ queries, start, end, step, datasource, from, to }) => {
       try {
-        if (!rateLimiter.allowRequest('metrics', queries.length)) {
+        if (!rateLimiter.allowRequest('metrics')) {
           toolLogger.warn('Límite de solicitudes excedido para métricas');
           return createErrorResponse(
             'Límite de solicitudes excedido. Máximo 5 solicitudes por minuto y 200 por hora.',

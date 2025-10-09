@@ -27,7 +27,7 @@ export const registerLogsTool = (server: McpServer): void => {
     },
     async ({ queries, limit, start, end, datasource, from, to }) => {
       try {
-        if (!rateLimiter.allowRequest('logs', queries.length)) {
+        if (!rateLimiter.allowRequest('logs')) {
           toolLogger.warn('Límite de solicitudes excedido para logs');
           return createErrorResponse(
             'Límite de solicitudes excedido. Máximo 5 solicitudes por minuto y 200 por hora.',
