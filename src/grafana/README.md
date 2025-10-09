@@ -29,6 +29,7 @@ Este es un servidor de Protocolo de Control de Máquina (MCP) para interactuar c
 - Búsqueda y consulta de dashboards
 - Consulta de métricas usando PromQL u otros lenguajes de consulta soportados
 - Consulta de logs usando LogQL u otros lenguajes de consulta soportados
+- Consulta de datos usando SQL
 - Búsqueda de fuentes de datos (datasources) por nombre, tipo o UID
 - Configuración de logs a archivo y nivel de log personalizable
 
