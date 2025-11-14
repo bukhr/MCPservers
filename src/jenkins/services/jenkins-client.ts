@@ -132,10 +132,13 @@ export class JenkinsClient implements JenkinsClientInterface {
       const branchOrPr = decodeURIComponent(branchOrPrRaw);
 
       const isPr = URL_PATTERNS.PR_NUMBER.test(branchOrPr);
-      const encodedJob = encodeURIComponent(jobName);
       const encodedBranch = encodeURIComponent(branchOrPr);
 
-      const base = `${u.origin}/job/${encodedJob}`;
+      const jobSegments = jobName.split('/').filter(Boolean);
+      if (!jobSegments.length) return null;
+
+      const jobPath = jobSegments.map(segment => `job/${encodeURIComponent(segment)}`).join('/');
+      const base = `${u.origin}/${jobPath}`;
       if (isPr) {
         return `${base}/view/change-requests/job/${encodedBranch}/${buildNumber}`;
       }
