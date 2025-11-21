@@ -48,6 +48,9 @@ En `path/to/jira_mcp/main.ts` reemplaza `path/to` con la ruta absoluta en tu má
 El servidor MCP será iniciado automáticamente por Codeium cuando sea necesario. Comandos disponibles:
 
 - `get_issue`: Obtener información sobre un issue específico de Jira por su clave (ej. "RMPRE-123")
+- `search_issues`: Buscar issues usando JQL (Jira Query Language)
+- `create_issue`: Crear un nuevo issue en un proyecto
+- `update_issue`: Actualizar el summary o descripción de un issue existente
 
 ## Desarrollo
 
