@@ -213,6 +213,20 @@ describe('JenkinsClient', () => {
       expect(result).toBe('https://jenkins.example.com/job/test-job/view/change-requests/job/PR-123/1');
     });
 
+    test('should convert nested Blue Ocean job URL to classic URL', () => {
+      const blueUrl = 'https://jenkins.example.com/blue/organizations/jenkins/folder%2Ftest-job/detail/master/7/';
+      const result = (jenkinsClient as any).convertToClassicBuildUrl(blueUrl);
+
+      expect(result).toBe('https://jenkins.example.com/job/folder/job/test-job/job/master/7');
+    });
+
+    test('should convert nested Blue Ocean PR URL to classic URL', () => {
+      const blueUrl = 'https://jenkins.example.com/blue/organizations/jenkins/folder%2Ftest-job/detail/PR-456/3/';
+      const result = (jenkinsClient as any).convertToClassicBuildUrl(blueUrl);
+
+      expect(result).toBe('https://jenkins.example.com/job/folder/job/test-job/view/change-requests/job/PR-456/3');
+    });
+
     test('should return null for invalid URLs', () => {
       const invalidUrl = 'not-a-url';
       const result = (jenkinsClient as any).convertToClassicBuildUrl(invalidUrl);
