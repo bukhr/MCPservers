@@ -39,6 +39,14 @@ export const registerCheckJobsTool = (server: McpServer): void => {
           toolLogger.info('Fetching build by URL', { pipeline_url });
           
           const payload = await processCheckJobsByUrl(client, pipeline_url);
+
+          if (!payload || !payload.log_full) {
+            return createErrorResponse('The logs could not be found', { 
+              error: 'No log found',
+              job_full_name,
+              pipeline_url
+            });
+          }
           
           return createSuccessResponse(payload);
         }
@@ -46,6 +54,14 @@ export const registerCheckJobsTool = (server: McpServer): void => {
         toolLogger.info('Fetching builds', { job_full_name });
         
         const payload = await processCheckJobsByJob(client, job_full_name!);
+
+        if (!payload || !payload.log_full) {
+          return createErrorResponse('The logs could not be found', { 
+            error: 'No log found',
+            job_full_name,
+            pipeline_url
+          });
+        }
         
         return createSuccessResponse(payload);
       } catch (error) {
