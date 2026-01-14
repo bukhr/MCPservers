@@ -160,7 +160,6 @@ describe('check-jobs tool', () => {
       });
       
       expect(result).toBeDefined();
-      expect(result).toBeDefined();
       expect(result.content[0].type).toBe('text');
       expect(JSON.parse(result.content[0].text)).toHaveProperty('status', 'success');
       
@@ -197,6 +196,50 @@ describe('check-jobs tool', () => {
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain('Error while checking jobs: Test error');
       expect(mockErrorLogger).toHaveBeenCalled();
+    });
+  });
+
+  describe('MCP response handling', () => {
+    test('should return error when URL job has no log', async () => {
+      toolModule.registerCheckJobsTool(mockServer);
+      
+      const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
+      
+      mockProcessCheckJobsByUrl.mockImplementationOnce(() => {
+        return Promise.resolve({
+          status: 'success',
+          job: 'test-url',
+          build: { number: 1 },
+          log_full: null
+        });
+      });
+      
+      const result = await handlerFn({ 
+        pipeline_url: 'https://jenkins.example.com/job/test-job/1/' 
+      });
+      
+      expect(result).toBeDefined();
+      expect(result.content[0].text).toContain('Error while checking jobs: The logs could not be found');
+    });
+    
+    test('should return error when job name build has no log', async () => {
+      toolModule.registerCheckJobsTool(mockServer);
+      
+      const handlerFn = (mockServer.tool as jest.Mock).mock.calls[0][3] as ToolHandler;
+      
+      mockProcessCheckJobsByJob.mockImplementationOnce(() => {
+        return Promise.resolve({
+          status: 'success',
+          job: 'test-job',
+          build: { number: 1 },
+          log_full: null
+        });
+      });
+      
+      const result = await handlerFn({ job_full_name: 'test-job' });
+      
+      expect(result).toBeDefined();
+      expect(result.content[0].text).toContain('Error while checking jobs: The logs could not be found');
     });
   });
 });
