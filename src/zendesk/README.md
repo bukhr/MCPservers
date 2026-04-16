@@ -1,6 +1,6 @@
 # Servidor MCP para Zendesk
 
-Un servidor Model Context Protocol (MCP) que se integra con la API de Zendesk, permitiendo la integración con Windsurf y otros clientes compatibles con MCP.
+Un servidor Model Context Protocol (MCP) que se integra con la API de Zendesk, permitiendo la integración con Claude Code y otros clientes compatibles con MCP.
 
 ## Características
 
@@ -8,6 +8,8 @@ Un servidor Model Context Protocol (MCP) que se integra con la API de Zendesk, p
 - **Detalles de Artículos**: Obtiene información detallada de artículos específicos por ID
 - **Consulta de Tickets**: Obtiene detalles de tickets específicos de Zendesk por ID
 - **Comentarios de Tickets**: Recupera todos los comentarios para un ticket específico de Zendesk
+- **Adjuntos de Tickets**: Lista todos los adjuntos de los comentarios de un ticket con sus metadatos
+- **Lectura de Adjuntos**: Descarga y procesa adjuntos; las imágenes se retornan como bloques visuales que Claude puede interpretar directamente
 
 ## Arquitectura del Proyecto
 
@@ -74,7 +76,7 @@ src/
    npm start
    ```
 
-El servidor se ejecutará en la entrada/salida estándar, haciéndolo compatible con Windsurf y otros clientes MCP.
+El servidor se ejecutará en la entrada/salida estándar, haciéndolo compatible con Claude Code y otros clientes MCP.
 
 ## Herramientas Disponibles
 
@@ -116,44 +118,89 @@ Recupera todos los comentarios de un ticket de Zendesk por su ID.
 
 - `ticket_id` (número, requerido): ID del ticket para obtener comentarios
 
-## Uso con Windsurf
+### 5. getTicketAttachments
 
-### Añadir a la Configuración `mcpServers` de Windsurf
+Lista todos los adjuntos de los comentarios de un ticket de Zendesk, incluyendo metadatos como nombre de archivo, URL, tipo MIME y tamaño.
 
-Añade la siguiente configuración a la sección `mcpServers` en el archivo de configuración de Windsurf:
+**Parámetros:**
 
-```json
-{
-  "mcpServers": {
-    "zendesk": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "tsx",
-        "/home/<nombre_usuario>/MCPservers/src/zendesk/src/index.ts"
-      ],
-      "env": {
-        "ZENDESK_SUBDOMAIN": "buk",
-        "ZENDESK_EMAIL": "email@buk.cl",
-        "ZENDESK_API_TOKEN": "token",
-        "DEFAULT_LOCALE": "es"
-      }
-    }
-  }
-}
+- `ticket_id` (número, requerido): ID del ticket del cual obtener los adjuntos
+
+**Respuesta:** Array de objetos `{ attachment, comment_id }` donde `attachment` contiene `id`, `file_name`, `content_url`, `content_type`, `size` e `inline`.
+
+### 6. readAttachment
+
+Descarga y retorna el contenido de un adjunto. Para imágenes, retorna un bloque de imagen que Claude puede interpretar directamente con sus capacidades de visión. Soporta imágenes, PDFs, HTML y archivos de texto. Rechaza archivos mayores a 10 MB.
+
+**Parámetros:**
+
+- `content_url` (string, requerido): URL del adjunto a descargar (obtenida de `getTicketAttachments`)
+- `content_type` (string, opcional): Tipo MIME del adjunto. Si se omite, se detecta automáticamente desde la respuesta HTTP.
+
+**Comportamiento según tipo MIME:**
+
+| Tipo | Comportamiento |
+|------|----------------|
+| `image/*` | Retorna bloque de imagen en base64 para interpretación visual |
+| `application/pdf` | Extrae y retorna el texto del PDF |
+| `text/html` | Limpia el HTML y retorna el texto |
+| `text/*` | Retorna el contenido como texto UTF-8 |
+| Otros | Retorna mensaje indicando tipo no soportado |
+
+## Uso con Claude Code
+
+### Registrar el MCP en Claude Code
+
+Ejecuta el siguiente comando reemplazando la ruta del proyecto, tu correo y tu API token:
+
+```bash
+claude mcp add zendesk --scope project node /home/tu-usuario/MCPservers/src/zendesk/dist/index.js \
+  -e ZENDESK_SUBDOMAIN=buk \
+  -e ZENDESK_EMAIL=tu-correo@buk.cl \
+  -e "ZENDESK_API_TOKEN=tu-token-api" \
+  -e DEFAULT_LOCALE=es
 ```
 
-Para obtener un API token de Zendesk, sigue los siguientes pasos:
+> **Nota:** el flag `--scope project` registra el MCP solo para el proyecto actual. Usa `--scope user` para registrarlo globalmente en tu usuario.
 
-> Nota:
-Para generar un token de API, debe ser un administrador y el acceso con token de API tiene que estar activado en su cuenta.
+El comando requiere que ya hayas clonado el repositorio y compilado el proyecto (`npm run build`) para que el archivo `dist/index.js` exista.
 
-### Generar un token de API
+### Pasos completos desde cero
 
-En el Centro de administración, haga clic en  Aplicaciones e integraciones en la barra lateral y luego seleccione API > API de Zendesk.
-Haga clic en el botón Agregar token de API a la derecha de Tokens de API activos. [Para más información puedes consultar la guia de zendesk](https://support.zendesk.com/hc/es/articles/4408889192858-Administración-del-acceso-a-la-API-de-Zendesk#topic_mmh_gm1_2yb)
+```bash
+# 1. Clonar el repositorio
+git clone https://github.com/bukhr/MCPservers.git
+cd MCPservers/src/zendesk
 
-Después de añadir esta configuración, podrás usar las herramientas de Zendesk dentro de Windsurf.
+# 2. Instalar dependencias y compilar
+npm install
+npm run build
+
+# 3. Registrar en Claude Code
+claude mcp add zendesk --scope project node /ruta/absoluta/MCPservers/src/zendesk/dist/index.js \
+  -e ZENDESK_SUBDOMAIN=buk \
+  -e ZENDESK_EMAIL=tu-correo@buk.cl \
+  -e "ZENDESK_API_TOKEN=tu-token-api" \
+  -e DEFAULT_LOCALE=es
+```
+
+### Generar un token de API de Zendesk
+
+> **Nota:** para generar un token de API debes ser administrador y el acceso con token de API debe estar activado en tu cuenta.
+
+En el Centro de administración, haz clic en **Aplicaciones e integraciones** en la barra lateral y selecciona **API > API de Zendesk**. Haz clic en **Agregar token de API** a la derecha de Tokens de API activos. [Más información en la guía de Zendesk](https://support.zendesk.com/hc/es/articles/4408889192858-Administración-del-acceso-a-la-API-de-Zendesk#topic_mmh_gm1_2yb)
+
+Después de registrar el MCP, **reinicia Claude Code** para que los cambios tomen efecto: sal con `exit` y vuelve a ingresar.
+
+### Verificar que el MCP quedó configurado
+
+Una vez dentro de Claude Code, ejecuta el comando:
+
+```text
+/mcp
+```
+
+Debiese aparecer `zendesk` en el listado de MCPs activos. Si no aparece, verifica que la ruta al archivo `dist/index.js` sea correcta y absoluta.
 
 ## Ejemplo de uso y caso de éxito
 
@@ -191,9 +238,7 @@ Solución recomendada: Mantener el truncamiento pero mejorar la forma en que se 
 - Utilizar acrónimos o abreviaturas consistentes para empresas con nombres largos
 Esta segunda opción sería compatible con Excel y proporcionaría una experiencia más profesional para el cliente.
 
-[https://windsurf.com/conversation-share/d46994a9-d0d6-45f2-9702-4c78d4d1f705](https://windsurf.com/conversation-share/d46994a9-d0d6-45f2-9702-4c78d4d1f705)
-
-### Nota: Gracias a este análisis identificamos el PR que habia cambiado el comportamiento por el cual se levanto el ticket
+### Nota: Gracias a este análisis identificamos el PR que había cambiado el comportamiento por el cual se levantó el ticket
 
 ## Desarrollo
 

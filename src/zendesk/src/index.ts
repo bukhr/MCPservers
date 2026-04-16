@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { ZendeskClient } from "./client.js";
 import { registerArticleTools } from "./tools/article-tools.js";
 import { registerTicketTools } from "./tools/ticket-tools.js";
+import { registerAttachmentTools } from "./tools/attachment-tools.js";
 
 /**
  * Zendesk Help Center MCP Server
@@ -58,6 +59,7 @@ async function main() {
   // Register all tools
   registerArticleTools(server, zendeskClient, config.defaultLocale);
   registerTicketTools(server, zendeskClient);
+  registerAttachmentTools(server, zendeskClient);
 
   // Start the server
   const transport = new StdioServerTransport();
