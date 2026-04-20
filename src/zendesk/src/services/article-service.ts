@@ -1,10 +1,11 @@
 /**
  * Service for Zendesk Help Center articles
  */
+import { isAxiosError } from "axios";
 import { BaseService } from "./base-service.js";
-import { 
-  ZendeskArticle, 
-  ZendeskSearchResponse, 
+import {
+  ZendeskArticle,
+  ZendeskSearchResponse,
   ZendeskArticleResponse,
   ArticleSearchParams,
   ArticleGetParams
@@ -65,15 +66,39 @@ export class ArticleService extends BaseService {
   }
 
   /**
-   * Get detailed information about a specific article
+   * Fetch a single article from the Zendesk API using the locale in the URL path.
+   * The Zendesk Help Center API requires the locale as part of the path:
+   * /help_center/{locale}/articles/{id}.json
+   * @param id Article ID
+   * @param locale Locale code to use in the URL path
+   * @returns Raw article response
+   */
+  private async fetchArticle(id: number, locale: string): Promise<ZendeskArticleResponse> {
+    const articleUrl = `/help_center/${locale}/articles/${id}.json`;
+    return this.makeRequest<ZendeskArticleResponse>(articleUrl);
+  }
+
+  /**
+   * Get detailed information about a specific article.
+   * If the request fails with 404 and the locale is not 'es-419', retries automatically
+   * with 'es-419' (Latin American Spanish), which is the locale used by Buk articles.
    * @param params Parameters including article ID and locale
    * @returns Article data with cleaned HTML content
    */
   async getArticle(params: ArticleGetParams): Promise<ZendeskArticleResponse> {
     const { id, locale = this.defaultLocale } = params;
-    const articleUrl = `/help_center/articles/${id}.json`;
 
-    const data = await this.makeRequest<ZendeskArticleResponse>(articleUrl, { locale });
+    let data: ZendeskArticleResponse;
+    try {
+      data = await this.fetchArticle(id, locale);
+    } catch (error) {
+      if (isAxiosError(error) && error.response?.status === 404 && locale !== 'es-419') {
+        // Retry with es-419 (Latin American Spanish) — the locale used by Buk articles
+        data = await this.fetchArticle(id, 'es-419');
+      } else {
+        throw error;
+      }
+    }
 
     // Filter article to only include specified fields
     if (data.article) {

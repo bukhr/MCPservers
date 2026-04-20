@@ -5,14 +5,15 @@ import * as readline from "node:readline";
 import { ZendeskConfig } from "./types/config.types.js";
 import { ArticleService } from "./services/article-service.js";
 import { TicketService } from "./services/ticket-service.js";
-import { 
-  ArticleSearchParams, 
-  ZendeskArticleResponse, 
-  ZendeskSearchResponse 
+import { AttachmentService, AttachmentWithCommentId, McpContentBlock } from "./services/attachment-service.js";
+import {
+  ArticleSearchParams,
+  ZendeskArticleResponse,
+  ZendeskSearchResponse
 } from "./types/article.types.js";
-import { 
-  ZendeskTicket, 
-  ZendeskTicketComment 
+import {
+  ZendeskTicket,
+  ZendeskTicketComment
 } from "./types/ticket.types.js";
 
 /**
@@ -22,6 +23,7 @@ import {
 export class ZendeskClient {
   private articleService: ArticleService;
   private ticketService: TicketService;
+  private attachmentService: AttachmentService;
   private defaultLocale: string;
   private config: ZendeskConfig;
 
@@ -32,10 +34,11 @@ export class ZendeskClient {
   constructor(config: ZendeskConfig) {
     this.config = config;
     this.defaultLocale = config.defaultLocale || "en";
-    
+
     // Initialize services
     this.articleService = new ArticleService(config);
     this.ticketService = new TicketService(config);
+    this.attachmentService = new AttachmentService(config);
   }
 
   /**
@@ -74,7 +77,24 @@ export class ZendeskClient {
     return this.ticketService.getTicketComments(ticketId);
   }
 
+  /**
+   * List all attachments from all comments of a ticket
+   * @param ticketId The ID of the ticket
+   * @returns Array of attachments with their parent comment ID
+   */
+  async getTicketAttachments(ticketId: number): Promise<AttachmentWithCommentId[]> {
+    return this.attachmentService.getTicketAttachments(ticketId);
+  }
 
+  /**
+   * Download and return the content of an attachment as MCP content blocks
+   * @param contentUrl The URL of the attachment
+   * @param contentType Optional MIME type hint
+   * @returns Array of MCP content blocks (text or image)
+   */
+  async readAttachment(contentUrl: string, contentType?: string): Promise<McpContentBlock[]> {
+    return this.attachmentService.readAttachment(contentUrl, contentType);
+  }
 
   /**
    * Run an interactive command-line interface for testing the client
