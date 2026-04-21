@@ -1,0 +1,38 @@
+{
+  "name": "grafana-mcp-oss",
+  "version": "1.0.0",
+  "description": "MCP server for Grafana OSS",
+  "main": "dist/main.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "node --loader ts-node/esm main.ts",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest",
+    "test:coverage": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --coverage"
+  },
+  "keywords": [
+    "mcp",
+    "grafana"
+  ],
+  "author": "Antonio Barbosa",
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.10.1",
+    "axios": "^1.6.0",
+    "express": "^4.18.2",
+    "winston": "^3.10.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7.27.1",
+    "@jest/globals": "^29.7.0",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.10.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.2"
+  }
+}
